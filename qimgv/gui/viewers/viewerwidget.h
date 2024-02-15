@@ -34,6 +34,9 @@ public:
     bool lockViewEnabled();
     ScalingFilter scalingFilter();
 
+		bool imageFits() const;
+		bool scaledImageFits() const;
+
 private:
     QVBoxLayout layout;
     std::unique_ptr<ImageViewerV2> imageViewer;

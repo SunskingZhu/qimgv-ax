@@ -132,10 +132,13 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
 
 void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result) {
     QFileInfo srcFile(srcFilePath);
+		QDir srcDir = srcFile.absoluteDir();
+		QString destDirPath2 = srcDir.absoluteFilePath(destDirPath);
+		srcDir.mkpath(destDirPath2);
     QString tmpPath;
     bool exists = false;
     // error checks
-    if(destDirPath == srcFile.absolutePath()) {
+    if(destDirPath2 == srcFile.absolutePath()) {
         result = FileOpResult::NOTHING_TO_DO;
         return;
     }
@@ -149,7 +152,7 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         return;
     }
     #endif
-    QFileInfo destDir(destDirPath);
+    QFileInfo destDir(destDirPath2);
     if(!destDir.exists()) {
         result = FileOpResult::DESTINATION_DOES_NOT_EXIST;
         return;
@@ -158,7 +161,7 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         result = FileOpResult::DESTINATION_NOT_WRITABLE;
         return;
     }
-    QFileInfo destFile(destDirPath + "/" + srcFile.fileName());
+    QFileInfo destFile(destDirPath2 + "/" + srcFile.fileName());
     if(destFile.exists()) {
 #ifdef Q_OS_WIN32
         if(!destFile.isWritable()) {
@@ -367,7 +370,7 @@ bool FileOperations::moveToTrashImpl(const QString &file) {
     if( !fileinfo.exists() )
         return false;
     WCHAR* from = (WCHAR*) calloc((size_t)fileinfo.absoluteFilePath().length() + 2, sizeof(WCHAR));
-    fileinfo.absoluteFilePath().toWCharArray(from);    
+    fileinfo.absoluteFilePath().toWCharArray(from);
     SHFILEOPSTRUCTW fileop;
     memset( &fileop, 0, sizeof( fileop ) );
     fileop.wFunc = FO_DELETE;

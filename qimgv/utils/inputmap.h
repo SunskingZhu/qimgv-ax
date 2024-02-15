@@ -12,6 +12,7 @@ public:
     static QString keyNameCtrl();
     static QString keyNameAlt();
     static QString keyNameShift();
+		static QString keyNameKeypad();
 
 private:
     void initKeyMap();

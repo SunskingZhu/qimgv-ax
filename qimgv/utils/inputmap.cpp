@@ -266,9 +266,10 @@ void InputMap::initKeyMap() {
 
 void InputMap::initModMap() {
     modMap.clear();
-    modMap.insert(keyNameCtrl(),  Qt::ControlModifier);
-    modMap.insert(keyNameAlt(),   Qt::AltModifier);
-    modMap.insert(keyNameShift(), Qt::ShiftModifier);
+    modMap.insert(keyNameCtrl(),   Qt::ControlModifier);
+    modMap.insert(keyNameAlt(),    Qt::AltModifier);
+    modMap.insert(keyNameShift(),  Qt::ShiftModifier);
+		modMap.insert(keyNameKeypad(), Qt::KeypadModifier);
 }
 
 QString InputMap::keyNameCtrl() {
@@ -293,4 +294,9 @@ QString InputMap::keyNameShift() {
 #else
     return "Shift";
 #endif
+}
+
+QString InputMap::keyNameKeypad()
+{
+	return "Numpad";
 }

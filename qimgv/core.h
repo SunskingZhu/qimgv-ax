@@ -175,4 +175,6 @@ private slots:
     void prevDirectory();
     void print();
     void modelDelayLoad();
+
+		void moveFilePathX(int index);
 };

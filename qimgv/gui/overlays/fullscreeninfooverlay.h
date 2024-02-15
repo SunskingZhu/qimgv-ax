@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QTimer>
 #include "gui/customwidgets/overlaywidget.h"
 
 namespace Ui {
@@ -15,6 +16,11 @@ public:
     ~FullscreenInfoOverlay();
     void setInfo(QString pos, QString fileName, QString info);
 
+		void show();
+    void show(int duration);
+
 private:
     Ui::FullscreenInfoOverlay *ui;
+		QTimer visibilityTimer;
+		int hideDelay;
 };

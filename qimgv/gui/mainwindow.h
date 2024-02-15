@@ -53,6 +53,7 @@ struct CurrentInfo {
     bool slideshow;
     bool shuffle;
     bool edited;
+		std::shared_ptr<Image> image;
 };
 
 enum ActiveSidePanel {
@@ -71,10 +72,13 @@ public:
     void showAnimation(std::shared_ptr<QMovie> movie);
     void showVideo(QString file);
 
-    void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
+    void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited, std::shared_ptr<Image> image);
     void setExifInfo(QMap<QString, QString>);
     std::shared_ptr<FolderViewProxy> getFolderView();
     std::shared_ptr<ThumbnailStripProxy> getThumbnailPanel();
+
+		bool imageFits() const;
+		bool scaledImageFits() const;
 
     ViewMode currentViewMode();
 

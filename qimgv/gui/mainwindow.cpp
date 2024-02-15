@@ -767,7 +767,7 @@ void MW::closeFullScreenOrExit() {
 }
 
 // todo: this is crap, use shared state object
-void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, qint64 _fileSize, bool slideshow, bool shuffle, bool edited) {
+void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, qint64 _fileSize, bool slideshow, bool shuffle, bool edited, std::shared_ptr<Image> image) {
     info.index = _index;
     info.fileCount = _fileCount;
     info.fileName = _fileName;
@@ -777,6 +777,7 @@ void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _
     info.slideshow = slideshow;
     info.shuffle = shuffle;
     info.edited = edited;
+		info.image = image;
     onInfoUpdated();
 }
 
@@ -784,10 +785,16 @@ void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _
 void MW::onInfoUpdated() {
     QString posString;
     if(info.fileCount)
-        posString = "[ " + QString::number(info.index + 1) + "/" + QString::number(info.fileCount) + " ]";
+        posString = "[ " + QString::number(info.index + 1) + " / " + QString::number(info.fileCount) + " ]";
     QString resString;
     if(info.imageSize.width())
         resString = QString::number(info.imageSize.width()) + " x " + QString::number(info.imageSize.height());
+
+		Image* image = info.image.get();
+		if (image) {
+			resString += " :: " + image->format().toUpper() + " :: " + image->mimeType().name().toUtf8();
+		}
+
     QString sizeString;
     if(info.fileSize)
         sizeString = this->locale().formattedDataSize(info.fileSize, 1);
@@ -830,7 +837,16 @@ void MW::onInfoUpdated() {
         if(info.edited)
             windowTitle.prepend("* ");
 
-        infoBarFullscreen->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), resString + "  " + sizeString);
+				QStringList info_list;
+				info_list << info.directoryPath << resString + " :: " + sizeString;
+				if (states.isEmpty() == false) {
+					info_list << states;
+				}
+        infoBarFullscreen->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), info_list.join('\n'));
+				if (showInfoBarFullscreen == false) {
+					infoBarFullscreen->showWhenReady(1500);
+				}
+
         infoBarWindowed->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), resString + "  " + sizeString + " " + states);
     }
     setWindowTitle(windowTitle);
@@ -847,7 +863,17 @@ std::shared_ptr<FolderViewProxy> MW::getFolderView() {
 }
 
 std::shared_ptr<ThumbnailStripProxy> MW::getThumbnailPanel() {
-    return docWidget->thumbPanel();
+	return docWidget->thumbPanel();
+}
+
+bool MW::imageFits() const
+{
+	return viewerWidget->imageFits();
+}
+
+bool MW::scaledImageFits() const
+{
+	return viewerWidget->scaledImageFits();
 }
 
 // todo: this is crap
@@ -942,7 +968,7 @@ void MW::adaptToWindowState() {
         if(showInfoBarFullscreen)
             infoBarFullscreen->showWhenReady();
         else
-            infoBarFullscreen->hide();    
+            infoBarFullscreen->hide();
 
         auto pos = settings->panelPosition();
         if(!settings->panelEnabled() || pos == PANEL_BOTTOM || pos == PANEL_LEFT)

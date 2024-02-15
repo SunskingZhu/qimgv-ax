@@ -135,6 +135,25 @@ void Core::connectComponents() {
 void Core::initActions() {
     connect(actionManager, &ActionManager::nextImage, this, &Core::nextImage);
     connect(actionManager, &ActionManager::prevImage, this, &Core::prevImage);
+
+		connect(actionManager, &ActionManager::scrollLeft, this, [this] () {
+			if (mw->scaledImageFits()) {
+				this->prevImage();
+			} else {
+				mw->scrollLeft();
+			}
+		});
+    connect(actionManager, &ActionManager::scrollRight, this, [this] () {
+			if (mw->scaledImageFits()) {
+				this->nextImage();
+			} else {
+				mw->scrollRight();
+			}
+		});
+
+		//connect(actionManager, &ActionManager::scrollLeft, mw, &MW::scrollLeft);
+    //connect(actionManager, &ActionManager::scrollRight, mw, &MW::scrollRight);
+
     connect(actionManager, &ActionManager::fitWindow, mw, &MW::fitWindow);
     connect(actionManager, &ActionManager::fitWidth, mw, &MW::fitWidth);
     connect(actionManager, &ActionManager::fitNormal, mw, &MW::fitOriginal);
@@ -148,8 +167,6 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::zoomOutCursor, mw, &MW::zoomOutCursor);
     connect(actionManager, &ActionManager::scrollUp, mw, &MW::scrollUp);
     connect(actionManager, &ActionManager::scrollDown, mw, &MW::scrollDown);
-    connect(actionManager, &ActionManager::scrollLeft, mw, &MW::scrollLeft);
-    connect(actionManager, &ActionManager::scrollRight, mw, &MW::scrollRight);
     connect(actionManager, &ActionManager::resize, this, &Core::showResizeDialog);
     connect(actionManager, &ActionManager::flipH, this, &Core::flipH);
     connect(actionManager, &ActionManager::flipV, this, &Core::flipV);
@@ -202,6 +219,34 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::print, this, &Core::print);
     connect(actionManager, &ActionManager::toggleFullscreenInfoBar, this, &Core::toggleFullscreenInfoBar);
     connect(actionManager, &ActionManager::pasteFile, this, &Core::openFromClipboard);
+
+		connect(actionManager, &ActionManager::moveFilePath1, this, [this] () {
+			this->moveFilePathX(1);
+		});
+		connect(actionManager, &ActionManager::moveFilePath2, this, [this] () {
+			this->moveFilePathX(2);
+		});
+		connect(actionManager, &ActionManager::moveFilePath3, this, [this] () {
+			this->moveFilePathX(3);
+		});
+		connect(actionManager, &ActionManager::moveFilePath4, this, [this] () {
+			this->moveFilePathX(4);
+		});
+		connect(actionManager, &ActionManager::moveFilePath5, this, [this] () {
+			this->moveFilePathX(5);
+		});
+		connect(actionManager, &ActionManager::moveFilePath6, this, [this] () {
+			this->moveFilePathX(6);
+		});
+		connect(actionManager, &ActionManager::moveFilePath7, this, [this] () {
+			this->moveFilePathX(7);
+		});
+		connect(actionManager, &ActionManager::moveFilePath8, this, [this] () {
+			this->moveFilePathX(8);
+		});
+		connect(actionManager, &ActionManager::moveFilePath9, this, [this] () {
+			this->moveFilePathX(9);
+		});
 }
 
 void Core::loadTranslation() {
@@ -913,7 +958,7 @@ void Core::moveCurrentFile(QString destDirectory) {
     FileOpResult result;
     model->moveFileTo(selectedPath(), destDirectory, false, result);
     if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(tr("File moved."));
+        mw->showMessageSuccess(tr("File moved.") + '\n' + destDirectory);
     } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
         if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
             model->moveFileTo(selectedPath(), destDirectory, true, result);
@@ -934,7 +979,7 @@ void Core::copyCurrentFile(QString destDirectory) {
     FileOpResult result;
     model->copyFileTo(selectedPath(), destDirectory, false, result);
     if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(tr("File copied."));
+        mw->showMessageSuccess(tr("File copied.") + '\n' + destDirectory);
     } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
         if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
             model->copyFileTo(selectedPath(), destDirectory, true, result);
@@ -1472,7 +1517,17 @@ void Core::modelDelayLoad() {
     model->setDirectory(state.directoryPath);
     mw->setDirectoryPath(state.directoryPath);
     model->updateImage(state.currentFilePath, state.currentImg);
-    updateInfoString();
+		updateInfoString();
+}
+
+void Core::moveFilePathX(int index)
+{
+	--index;
+	QStringList paths = settings->savedPaths();
+	if (index < 0 || index >= paths.size()) {
+		return;
+	}
+	this->moveCurrentFile(paths.at(index));
 }
 
 void Core::onModelItemUpdated(QString filePath) {
@@ -1517,9 +1572,10 @@ void Core::updateInfoString() {
     QSize imageSize(0,0);
     qint64 fileSize = 0;
     bool edited = false;
+		std::shared_ptr<Image> img;
 
     if(model->isLoaded(state.currentFilePath)) {
-        auto img = model->getImage(state.currentFilePath);
+        img = model->getImage(state.currentFilePath);
         imageSize = img->size();
         fileSize  = img->fileSize();
         edited = img->isEdited();
@@ -1533,5 +1589,6 @@ void Core::updateInfoString() {
                        fileSize,
                        slideshow,
                        shuffle,
-                       edited);
+                       edited,
+											 img);
 }

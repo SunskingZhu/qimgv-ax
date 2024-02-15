@@ -30,6 +30,9 @@ public:
     QDateTime lastModified() const;
     QMap<QString, QString> getExifTags();
 
+		QString format() const;
+    QMimeType mimeType() const;
+
 protected:
     virtual void load() = 0;
     std::unique_ptr<DocumentInfo> mDocInfo;

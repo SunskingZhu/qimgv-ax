@@ -52,6 +52,16 @@ QDateTime Image::lastModified() const {
 }
 
 QMap<QString, QString> Image::getExifTags() {
-    return mDocInfo->getExifTags();
+	return mDocInfo->getExifTags();
+}
+
+QString Image::format() const
+{
+	return mDocInfo->format();
+}
+
+QMimeType Image::mimeType() const
+{
+	return mDocInfo->mimeType();
 }
 

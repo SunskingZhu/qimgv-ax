@@ -17,8 +17,8 @@ SCRIPTS_DIR=$(dirname $(readlink -f $0)) # this file's location (/path/to/qimgv/
 SRC_DIR=$(dirname $SCRIPTS_DIR)
 BUILD_DIR=$SRC_DIR/build
 EXT_DIR=$SRC_DIR/_external
-rm -rf "$EXT_DIR"
-mkdir "$EXT_DIR"
+#rm -rf "$EXT_DIR"
+#mkdir "$EXT_DIR"
 MPV_DIR=$EXT_DIR/mpv
 
 # ------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ ninja -C build
 
 # qtraw
 cd $EXT_DIR
-git clone https://gitlab.com/mardy/qtraw
+#git clone https://gitlab.com/mardy/qtraw
 cd qtraw
 rm -rf build
 mkdir build && cd build

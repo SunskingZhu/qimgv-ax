@@ -20,7 +20,17 @@ void FullscreenInfoOverlayProxy::showWhenReady() {
     if(!infoOverlay)
         stateBuf.showImmediately = true;
     else
-        infoOverlay->show();
+			infoOverlay->show();
+}
+
+void FullscreenInfoOverlayProxy::showWhenReady(int duration)
+{
+	if(!infoOverlay) {
+			stateBuf.showImmediately = true;
+			stateBuf.duration = duration;
+	} else {
+		infoOverlay->show(duration);
+	}
 }
 
 void FullscreenInfoOverlayProxy::hide() {
@@ -45,6 +55,11 @@ void FullscreenInfoOverlayProxy::init() {
     infoOverlay = new FullscreenInfoOverlay(container);
     if(!stateBuf.fileName.isEmpty())
         setInfo(stateBuf.position, stateBuf.fileName, stateBuf.info);
-    if(stateBuf.showImmediately)
-        infoOverlay->show();
+		if(stateBuf.showImmediately) {
+			if (stateBuf.duration) {
+				infoOverlay->show(stateBuf.duration);
+			} else {
+				infoOverlay->show();
+			}
+		}
 }

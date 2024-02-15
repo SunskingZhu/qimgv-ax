@@ -123,6 +123,16 @@ signals:
     void print();
     void toggleFullscreenInfoBar();
     void pasteFile();
+
+		void moveFilePath1();
+		void moveFilePath2();
+		void moveFilePath3();
+		void moveFilePath4();
+		void moveFilePath5();
+		void moveFilePath6();
+		void moveFilePath7();
+		void moveFilePath8();
+		void moveFilePath9();
 };
 
 extern ActionManager *actionManager;

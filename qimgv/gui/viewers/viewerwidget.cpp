@@ -363,7 +363,17 @@ bool ViewerWidget::lockViewEnabled() {
 }
 
 ScalingFilter ViewerWidget::scalingFilter() {
-    return imageViewer->scalingFilter();
+	return imageViewer->scalingFilter();
+}
+
+bool ViewerWidget::imageFits() const
+{
+	return imageViewer->imageFits();
+}
+
+bool ViewerWidget::scaledImageFits() const
+{
+	return imageViewer->scaledImageFits();
 }
 
 void ViewerWidget::mousePressEvent(QMouseEvent *event) {
