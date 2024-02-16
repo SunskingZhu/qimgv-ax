@@ -78,6 +78,7 @@ public:
 
 		bool imageFits() const;
 		bool scaledImageFits() const;
+		bool scaledImageWidthFits() const;
 
     ViewMode currentViewMode();
 

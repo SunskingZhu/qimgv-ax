@@ -787,7 +787,6 @@ void MW::closeFullScreenOrExit() {
     }
 }
 
-// todo: nuke and rewrite
 void MW::onInfoUpdated()
 {
 	if (renameOverlay) {
@@ -918,6 +917,11 @@ bool MW::imageFits() const
 bool MW::scaledImageFits() const
 {
 	return viewerWidget->scaledImageFits();
+}
+
+bool MW::scaledImageWidthFits() const
+{
+	return viewerWidget->scaledImageWidthFits();
 }
 
 // todo: this is crap

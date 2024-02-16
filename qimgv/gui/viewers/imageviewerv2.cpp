@@ -451,6 +451,11 @@ bool ImageViewerV2::scaledImageFits() const {
             sz.height() <= viewport()->height());
 }
 
+bool ImageViewerV2::scaledImageWidthFits() const
+{
+	return pixmap ? (scaledSizeR().width() <= viewport()->width()) : true;
+}
+
 ScalingFilter ImageViewerV2::scalingFilter() const {
     return mScalingFilter;
 }

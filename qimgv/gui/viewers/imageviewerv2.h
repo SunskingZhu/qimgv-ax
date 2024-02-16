@@ -47,6 +47,7 @@ public:
 
     virtual bool imageFits() const;
     bool scaledImageFits() const;
+		bool scaledImageWidthFits() const;
     virtual ScalingFilter scalingFilter() const;
     virtual QWidget *widget();
     bool hasAnimation() const;

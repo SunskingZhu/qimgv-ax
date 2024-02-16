@@ -130,8 +130,6 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
     return;
 }
 
-#include <QMessageBox>
-
 void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result) {
     QFileInfo srcFile(srcFilePath);
 		QDir srcDir = srcFile.absoluteDir();
@@ -185,6 +183,14 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         QFile::rename(destFile.absoluteFilePath(), tmpPath);
         exists = true;
     }
+
+		if (QFile::rename(srcFile.absoluteFilePath(), destFile.absoluteFilePath())) {
+			result = FileOpResult::SUCCESS;
+			if(exists)
+				QFile::remove(tmpPath);
+			return;
+		}
+
     // move
     auto srcModTime = srcFile.lastModified();
     auto srcReadTime = srcFile.lastRead();
@@ -211,20 +217,13 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         result = FileOpResult::SOURCE_NOT_WRITABLE;
 				if(QFile::remove(destFile.absoluteFilePath())) {
             result = FileOpResult::OTHER_ERROR;
-						QMessageBox msgBox;
-						msgBox.setText("Can't delete source.");
-						msgBox.exec();
 				}
     } else {
         // could not COPY
         result = FileOpResult::OTHER_ERROR;
-				QMessageBox msgBox;
-				msgBox.setText("Can't copy.");
-				msgBox.exec();
     }
     if(exists) // failed; revert backup
         QFile::rename(tmpPath, destFile.absoluteFilePath());
-    return;
 }
 
 void FileOperations::rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result) {

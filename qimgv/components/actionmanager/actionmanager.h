@@ -133,6 +133,9 @@ signals:
 		void moveFilePath7();
 		void moveFilePath8();
 		void moveFilePath9();
+
+		void nextImageOrScrollRight();
+		void prevImageOrScrollLeft();
 };
 
 extern ActionManager *actionManager;

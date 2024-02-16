@@ -136,23 +136,23 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::nextImage, this, &Core::nextImage);
     connect(actionManager, &ActionManager::prevImage, this, &Core::prevImage);
 
-		connect(actionManager, &ActionManager::scrollLeft, this, [this] () {
-			if (mw->scaledImageFits()) {
+		connect(actionManager, &ActionManager::prevImageOrScrollLeft, this, [this] () {
+			if (mw->scaledImageWidthFits()) {
 				this->prevImage();
 			} else {
 				mw->scrollLeft();
 			}
 		});
-    connect(actionManager, &ActionManager::scrollRight, this, [this] () {
-			if (mw->scaledImageFits()) {
+    connect(actionManager, &ActionManager::nextImageOrScrollRight, this, [this] () {
+			if (mw->scaledImageWidthFits()) {
 				this->nextImage();
 			} else {
 				mw->scrollRight();
 			}
 		});
 
-		//connect(actionManager, &ActionManager::scrollLeft, mw, &MW::scrollLeft);
-    //connect(actionManager, &ActionManager::scrollRight, mw, &MW::scrollRight);
+		connect(actionManager, &ActionManager::scrollLeft, mw, &MW::scrollLeft);
+    connect(actionManager, &ActionManager::scrollRight, mw, &MW::scrollRight);
 
     connect(actionManager, &ActionManager::fitWindow, mw, &MW::fitWindow);
     connect(actionManager, &ActionManager::fitWidth, mw, &MW::fitWidth);

@@ -376,6 +376,11 @@ bool ViewerWidget::scaledImageFits() const
 	return imageViewer->scaledImageFits();
 }
 
+bool ViewerWidget::scaledImageWidthFits() const
+{
+	return imageViewer->scaledImageWidthFits();
+}
+
 void ViewerWidget::mousePressEvent(QMouseEvent *event) {
     hideContextMenu();
     event->ignore();

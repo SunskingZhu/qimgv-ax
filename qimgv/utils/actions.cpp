@@ -91,14 +91,17 @@ void Actions::init() {
     mActions.insert("toggleFullscreenInfoBar", QVersionNumber(1,0,0));
     mActions.insert("pasteFile", QVersionNumber(1,0,3));
 
-		mActions.insert("moveFilePath1", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath2", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath3", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath4", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath5", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath6", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath7", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath8", QVersionNumber(1,0,4));
-		mActions.insert("moveFilePath9", QVersionNumber(1,0,4));
+		mActions.insert("moveFilePath1", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath2", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath3", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath4", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath5", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath6", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath7", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath8", QVersionNumber(1,1,0));
+		mActions.insert("moveFilePath9", QVersionNumber(1,1,0));
+
+		mActions.insert("nextImageOrScrollRight", QVersionNumber(1,1,0));
+    mActions.insert("prevImageOrScrollLeft", QVersionNumber(1,1,0));
 }
 

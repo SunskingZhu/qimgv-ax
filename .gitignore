@@ -1,4 +1,5 @@
 .kdev4/
+.idea
 *.txt
 !CMakeLists.txt
 !msys2-build-deps.txt
