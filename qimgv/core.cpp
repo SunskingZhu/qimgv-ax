@@ -955,6 +955,8 @@ void Core::moveCurrentFile(QString destDirectory) {
     mw->setUpdatesEnabled(false);
     // move fails during file playback, so we close it temporarily
     mw->closeImage();
+		state.currentImg->closeMovie();
+
     FileOpResult result;
     model->moveFileTo(selectedPath(), destDirectory, false, result);
     if(result == FileOpResult::SUCCESS) {
@@ -1568,27 +1570,30 @@ void Core::guiSetImage(std::shared_ptr<Image> img) {
     mw->setExifInfo(img->getExifTags());
 }
 
-void Core::updateInfoString() {
-    QSize imageSize(0,0);
-    qint64 fileSize = 0;
-    bool edited = false;
-		std::shared_ptr<Image> img;
+void Core::updateInfoString()
+{
+	CurrentInfo &info = mw->info();
 
-    if(model->isLoaded(state.currentFilePath)) {
-        img = model->getImage(state.currentFilePath);
-        imageSize = img->size();
-        fileSize  = img->fileSize();
-        edited = img->isEdited();
-    }
-    int index = model->indexOfFile(state.currentFilePath);
-    mw->setCurrentInfo(index,
-                       model->fileCount(),
-                       model->filePathAt(index),
-                       model->fileNameAt(index),
-                       imageSize,
-                       fileSize,
-                       slideshow,
-                       shuffle,
-                       edited,
-											 img);
+	int index = model->indexOfFile(state.currentFilePath);
+
+	info.index = index;
+	info.fileCount = model->fileCount();
+	info.fileName = model->fileNameAt(index);
+	info.filePath = model->filePathAt(index);
+	info.slideshow = slideshow;
+	info.shuffle = shuffle;
+
+	if (model->isLoaded(state.currentFilePath)) {
+		info.image = model->getImage(state.currentFilePath);
+		info.imageSize = info.image->size();
+		info.fileSize = info.image->fileSize();
+		info.edited = info.image->isEdited();
+	} else {
+		info.image = nullptr;
+		info.imageSize = QSize(0, 0);
+		info.fileSize = 0;
+		info.edited = false;
+	}
+
+	mw->updateInfo();
 }

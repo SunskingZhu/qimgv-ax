@@ -47,7 +47,10 @@ enum ScalingFilter {
     QI_FILTER_BILINEAR,
     QI_FILTER_CV_BILINEAR_SHARPEN,
     QI_FILTER_CV_CUBIC,
-    QI_FILTER_CV_CUBIC_SHARPEN
+    QI_FILTER_CV_CUBIC_SHARPEN,
+	QI_FILTER_CV_LANCZOS4,
+	QI_FILTER_CV_LANCZOS4_SHARPEN,
+	QI_FILTER_LAST
 };
 
 enum ZoomIndicatorMode {
@@ -164,7 +167,7 @@ public:
     bool blurBackground();
     void setBlurBackground(bool mode);
     void setSortingMode(SortingMode mode);
-    SortingMode sortingMode();    
+    SortingMode sortingMode();
     void readScripts(QMap<QString, Script> &scripts);
     void saveScripts(const QMap<QString, Script> &scripts);
     int folderViewIconSize();

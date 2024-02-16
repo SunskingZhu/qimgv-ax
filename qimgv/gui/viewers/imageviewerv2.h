@@ -140,7 +140,7 @@ private:
     const qreal SCROLL_SPEED_MILTIPLIER = 1.3;
     const qreal TRACKPAD_SCROLL_MULTIPLIER = 0.7;
     const int ANIMATION_SPEED = 150;
-    const float FAST_SCALE_THRESHOLD = 1.0f;
+    const float FAST_SCALE_THRESHOLD = 4.0f;
     const int LARGE_VIEWPORT_SIZE = 2073600;
     // how many px you can move while holding RMB until it counts as a zoom attempt
     int zoomThreshold = 4;

@@ -39,7 +39,12 @@ void ImageAnimated::loadMovie() {
 }
 
 int ImageAnimated::frameCount() {
-    return mFrameCount;
+	return mFrameCount;
+}
+
+void ImageAnimated::closeMovie()
+{
+	movie = nullptr;
 }
 
 // TODO: overwrite (self included)

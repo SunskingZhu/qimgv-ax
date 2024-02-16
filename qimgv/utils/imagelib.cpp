@@ -166,6 +166,10 @@ QImage* ImageLib::scaled(std::shared_ptr<const QImage> source, QSize destSize, S
             return scaled_CV(scaleTarget, destSize, cv::INTER_CUBIC, 0);
         case QI_FILTER_CV_CUBIC_SHARPEN:
             return scaled_CV(scaleTarget, destSize, cv::INTER_CUBIC, 1);
+				case QI_FILTER_CV_LANCZOS4:
+						return scaled_CV(scaleTarget, destSize, cv::INTER_LANCZOS4, 0);
+				case QI_FILTER_CV_LANCZOS4_SHARPEN:
+						return scaled_CV(scaleTarget, destSize, cv::INTER_LANCZOS4, 1);
 #endif
         default:
             return scaled_Qt(scaleTarget, destSize, true);

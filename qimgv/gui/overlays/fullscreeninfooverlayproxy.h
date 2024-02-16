@@ -2,14 +2,6 @@
 
 #include "gui/overlays/fullscreeninfooverlay.h"
 
-struct InfoOverlayStateBuffer {
-    QString position;
-    QString fileName;
-    QString info;
-    bool showImmediately = false;
-		int duration = 0;
-};
-
 class FullscreenInfoOverlayProxy {
 public:
     explicit FullscreenInfoOverlayProxy(FloatingWidgetContainer *parent = nullptr);
@@ -19,9 +11,15 @@ public:
     void showWhenReady();
 		void showWhenReady(int duration);
     void hide();
-    void setInfo(QString position, QString fileName, QString info);
+    void setInfo(const QStringList &info);
 
 private:
+		struct InfoOverlayStateBuffer {
+				QStringList info;
+				bool showImmediately = false;
+				int duration = 0;
+		};
+
     FloatingWidgetContainer *container;
     FullscreenInfoOverlay *infoOverlay;
     InfoOverlayStateBuffer stateBuf;

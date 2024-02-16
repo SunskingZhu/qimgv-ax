@@ -311,7 +311,7 @@ void ImageViewerV2::reset() {
     pixmapItem.setOffset(10000,10000);
     pixmap.reset();
     stopAnimation();
-    movie = nullptr;
+		movie = nullptr;
     centerOn(sceneRect().center());
     // when this view is not in focus this it won't update the background
     // so we force it here
@@ -338,19 +338,19 @@ bool ImageViewerV2::isDisplaying() const {
 }
 
 void ImageViewerV2::scrollUp() {
-    scroll(0, -SCROLL_DISTANCE, true);
+    scroll(0, -SCROLL_DISTANCE, settings->enableSmoothScroll());
 }
 
 void ImageViewerV2::scrollDown() {
-    scroll(0, SCROLL_DISTANCE, true);
+    scroll(0, SCROLL_DISTANCE, settings->enableSmoothScroll());
 }
 
 void ImageViewerV2::scrollLeft() {
-    scroll(-SCROLL_DISTANCE, 0, true);
+    scroll(-SCROLL_DISTANCE, 0, settings->enableSmoothScroll());
 }
 
 void ImageViewerV2::scrollRight() {
-    scroll(SCROLL_DISTANCE, 0, true);
+    scroll(SCROLL_DISTANCE, 0, settings->enableSmoothScroll());
 }
 
 // temporary override till application restart
@@ -426,7 +426,7 @@ void ImageViewerV2::hide() {
 }
 
 void ImageViewerV2::requestScaling() {
-    if(!pixmap || pixmapItem.scale() == 1.0f || (!smoothUpscaling && pixmapItem.scale() >= 1.0f) || movie)
+    if(!pixmap || pixmapItem.scale() == 1.0f || movie)
         return;
     if(scaleTimer->isActive())
         scaleTimer->stop();

@@ -8,7 +8,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle(tr("Preferences — ") + qApp->applicationName());
 
-    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);   
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->aboutAppTextBrowser->viewport()->setAutoFillBackground(false);
     ui->versionLabel->setText("" + QApplication::applicationVersion());
     ui->qtVersionLabel->setText(qVersion());
@@ -78,6 +78,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->scalingQualityComboBox->addItem("Bilinear+sharpen (OpenCV)");
     ui->scalingQualityComboBox->addItem("Bicubic (OpenCV)");
     ui->scalingQualityComboBox->addItem("Bicubic+sharpen (OpenCV)");
+		ui->scalingQualityComboBox->addItem("Lanczos4 (OpenCV)");
+    ui->scalingQualityComboBox->addItem("Lanczos4+sharpen (OpenCV)");
 #endif
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -281,7 +283,7 @@ void SettingsDialog::readSettings() {
     ui->modifySystemSchemeLabel->setVisible(settings->useSystemColorScheme());
     ui->themeSelectorComboBox->setEnabled(!settings->useSystemColorScheme());
     ui->colorConfigSubgroup->setEnabled(!settings->useSystemColorScheme());
-    
+
     readColorScheme();
     readShortcuts();
     readScripts();

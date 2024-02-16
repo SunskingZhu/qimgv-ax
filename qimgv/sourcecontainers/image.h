@@ -33,6 +33,8 @@ public:
 		QString format() const;
     QMimeType mimeType() const;
 
+		inline virtual void closeMovie() {}
+
 protected:
     virtual void load() = 0;
     std::unique_ptr<DocumentInfo> mDocInfo;

@@ -21,6 +21,9 @@ public:
     bool isEdited();
 
     int frameCount();
+
+		virtual void closeMovie() override;
+
 public slots:
     bool save();
     bool save(QString destPath);

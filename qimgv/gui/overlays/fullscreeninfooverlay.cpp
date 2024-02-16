@@ -1,15 +1,18 @@
 #include "fullscreeninfooverlay.h"
-#include "ui_fullscreeninfooverlay.h"
 
-FullscreenInfoOverlay::FullscreenInfoOverlay(FloatingWidgetContainer *parent) :
-    OverlayWidget(parent),
-    ui(new Ui::FullscreenInfoOverlay)
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QFont>
+
+FullscreenInfoOverlay::FullscreenInfoOverlay(FloatingWidgetContainer *parent) : OverlayWidget(parent)
 {
-    ui->setupUi(this);
     setPosition(FloatingWidgetPosition::TOPLEFT);
     this->setHorizontalMargin(0);
     this->setVerticalMargin(0);
-    ui->nameLabel->setText("No file opened");
+
+		this->setLayout(new QVBoxLayout());
+		this->setInfo(QStringList() << "No file opened");
+
     if(parent)
         setContainerSize(parent->size());
 
@@ -20,15 +23,36 @@ FullscreenInfoOverlay::FullscreenInfoOverlay(FloatingWidgetContainer *parent) :
 		connect(&visibilityTimer, &QTimer::timeout, this, &FullscreenInfoOverlay::hideAnimated);
 }
 
-FullscreenInfoOverlay::~FullscreenInfoOverlay() {
-    delete ui;
-}
+void FullscreenInfoOverlay::setInfo(const QStringList &info)
+{
+	this->blockSignals(true);
 
-void FullscreenInfoOverlay::setInfo(QString pos, QString fileName, QString info) {
-    ui->posLabel->setText(pos);
-    ui->nameLabel->setText(fileName);
-    ui->infoLabel->setText(info);
-		this->adjustSize();
+	QLayout *layout = this->layout();
+
+	while (layout->count() > info.count()) {
+		QLayoutItem *item;
+		while ((item = layout->takeAt(0)) != nullptr) {
+			delete item->widget();
+			delete item;
+		}
+	}
+	while (layout->count() < info.count()) {
+		QLabel *label = new QLabel(this);
+		QFont font = label->font();
+		font.setPointSize(12);
+		label->setFont(font);
+		layout->addWidget(label);
+	}
+
+	int index = 0;
+	foreach (const QString &text, info) {
+		QLayoutItem *item =	layout->itemAt(index++);
+		static_cast<QLabel *>(item->widget())->setText(text);
+	}
+
+	this->blockSignals(false);
+
+	this->adjustSize();
 }
 
 void FullscreenInfoOverlay::show()

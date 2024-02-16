@@ -39,12 +39,10 @@ void FullscreenInfoOverlayProxy::hide() {
         infoOverlay->hide();
 }
 
-void FullscreenInfoOverlayProxy::setInfo(QString _position, QString _fileName, QString _info) {
+void FullscreenInfoOverlayProxy::setInfo(const QStringList &_info) {
     if(infoOverlay) {
-        infoOverlay->setInfo(_position, _fileName, _info);
+        infoOverlay->setInfo(_info);
     } else {
-        stateBuf.position = _position;
-        stateBuf.fileName = _fileName;
         stateBuf.info = _info;
     }
 }
@@ -53,8 +51,8 @@ void FullscreenInfoOverlayProxy::init() {
     if(infoOverlay)
         return;
     infoOverlay = new FullscreenInfoOverlay(container);
-    if(!stateBuf.fileName.isEmpty())
-        setInfo(stateBuf.position, stateBuf.fileName, stateBuf.info);
+    if(!stateBuf.info.isEmpty())
+        setInfo(stateBuf.info);
 		if(stateBuf.showImmediately) {
 			if (stateBuf.duration) {
 				infoOverlay->show(stateBuf.duration);

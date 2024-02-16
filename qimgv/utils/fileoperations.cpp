@@ -130,6 +130,8 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
     return;
 }
 
+#include <QMessageBox>
+
 void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result) {
     QFileInfo srcFile(srcFilePath);
 		QDir srcDir = srcFile.absoluteDir();
@@ -207,11 +209,18 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         }
         // revert on failure
         result = FileOpResult::SOURCE_NOT_WRITABLE;
-        if(QFile::remove(destFile.absoluteFilePath()))
+				if(QFile::remove(destFile.absoluteFilePath())) {
             result = FileOpResult::OTHER_ERROR;
+						QMessageBox msgBox;
+						msgBox.setText("Can't delete source.");
+						msgBox.exec();
+				}
     } else {
         // could not COPY
         result = FileOpResult::OTHER_ERROR;
+				QMessageBox msgBox;
+				msgBox.setText("Can't copy.");
+				msgBox.exec();
     }
     if(exists) // failed; revert backup
         QFile::rename(tmpPath, destFile.absoluteFilePath());

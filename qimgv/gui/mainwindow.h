@@ -72,7 +72,6 @@ public:
     void showAnimation(std::shared_ptr<QMovie> movie);
     void showVideo(QString file);
 
-    void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited, std::shared_ptr<Image> image);
     void setExifInfo(QMap<QString, QString>);
     std::shared_ptr<FolderViewProxy> getFolderView();
     std::shared_ptr<ThumbnailStripProxy> getThumbnailPanel();
@@ -84,6 +83,9 @@ public:
 
     bool showConfirmation(QString title, QString msg);
     DialogResult fileReplaceDialog(QString source, QString target, FileReplaceMode mode, bool multiple);
+
+		CurrentInfo &info();
+		const CurrentInfo &info() const;
 
 private:
     std::shared_ptr<ViewerWidget> viewerWidget;
@@ -114,7 +116,7 @@ private:
     FloatingMessageProxy *floatingMessage;
 
     PanelPosition panelPosition;
-    CurrentInfo info;
+    CurrentInfo m_info;
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QDesktopWidget desktopWidget;
 #endif
@@ -256,4 +258,6 @@ public slots:
     void toggleLockZoom();
     void toggleLockView();
     void toggleFullscreenInfoBar();
+
+		void updateInfo();
 };

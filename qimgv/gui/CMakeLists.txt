@@ -95,7 +95,6 @@ target_sources(qimgv PRIVATE
     overlays/changelogwindow.ui
     overlays/copyoverlay.ui
     overlays/floatingmessage.ui
-    overlays/fullscreeninfooverlay.ui
     overlays/imageinfooverlay.ui
     overlays/renameoverlay.ui
     overlays/saveconfirmoverlay.ui

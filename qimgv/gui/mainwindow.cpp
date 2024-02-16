@@ -136,7 +136,7 @@ void MW::setupSaveOverlay() {
 
 void MW::setupRenameOverlay() {
     renameOverlay = new RenameOverlay(this);
-    renameOverlay->setName(info.fileName);
+    renameOverlay->setName(m_info.fileName);
     connect(renameOverlay, &RenameOverlay::renameRequested, this, &MW::renameRequested);
 }
 
@@ -207,8 +207,8 @@ void MW::switchFitMode() {
 }
 
 void MW::closeImage() {
-    info.fileName = "";
-    info.filePath = "";
+    m_info.fileName = "";
+    m_info.filePath = "";
     viewerWidget->closeImage();
 }
 
@@ -280,8 +280,8 @@ void MW::onSortingChanged(SortingMode mode) {
 
 void MW::setDirectoryPath(QString path) {
     //closeImage();
-    info.directoryPath = path;
-    info.directoryName = path.split("/").last();
+    m_info.directoryPath = path;
+    m_info.directoryName = path.split("/").last();
     folderView->setDirectoryPath(path);
     onInfoUpdated();
 }
@@ -311,7 +311,12 @@ void MW::toggleFullscreenInfoBar() {
     if(showInfoBarFullscreen)
         infoBarFullscreen->showWhenReady();
     else
-        infoBarFullscreen->hide();
+			infoBarFullscreen->hide();
+}
+
+void MW::updateInfo()
+{
+	onInfoUpdated();
 }
 
 void MW::toggleImageInfoOverlay() {
@@ -373,6 +378,12 @@ void MW::setFilter(ScalingFilter filter) {
         case QI_FILTER_CV_CUBIC_SHARPEN:
             filterName = "bicubic + sharpen";
             break;
+			case QI_FILTER_CV_LANCZOS4:
+					filterName = "lanczos4";
+					break;
+			case QI_FILTER_CV_LANCZOS4_SHARPEN:
+					filterName = "lanczos4 + sharpen";
+					break;
         default:
             filterName = "configured " + QString::number(static_cast<int>(filter));
             break;
@@ -597,7 +608,17 @@ DialogResult MW::fileReplaceDialog(QString src, QString dst, FileReplaceMode mod
 
     dialog.exec();
 
-    return dialog.getResult();
+		return dialog.getResult();
+}
+
+CurrentInfo &MW::info()
+{
+	return m_info;
+}
+
+const CurrentInfo &MW::info() const
+{
+	return m_info;
 }
 
 void MW::showSettings() {
@@ -766,90 +787,113 @@ void MW::closeFullScreenOrExit() {
     }
 }
 
-// todo: this is crap, use shared state object
-void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, qint64 _fileSize, bool slideshow, bool shuffle, bool edited, std::shared_ptr<Image> image) {
-    info.index = _index;
-    info.fileCount = _fileCount;
-    info.fileName = _fileName;
-    info.filePath = _filePath;
-    info.imageSize = _imageSize;
-    info.fileSize = _fileSize;
-    info.slideshow = slideshow;
-    info.shuffle = shuffle;
-    info.edited = edited;
-		info.image = image;
-    onInfoUpdated();
-}
-
 // todo: nuke and rewrite
-void MW::onInfoUpdated() {
-    QString posString;
-    if(info.fileCount)
-        posString = "[ " + QString::number(info.index + 1) + " / " + QString::number(info.fileCount) + " ]";
-    QString resString;
-    if(info.imageSize.width())
-        resString = QString::number(info.imageSize.width()) + " x " + QString::number(info.imageSize.height());
+void MW::onInfoUpdated()
+{
+	if (renameOverlay) {
+		renameOverlay->setName(m_info.fileName);
+	}
 
-		Image* image = info.image.get();
-		if (image) {
-			resString += " :: " + image->format().toUpper() + " :: " + image->mimeType().name().toUtf8();
+	bool file_opened = false;
+	if (centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
+		setWindowTitle(tr("Folder view"));
+	} else if (m_info.fileName.isEmpty()) {
+		setWindowTitle(qApp->applicationName());
+	} else {
+		file_opened = true;
+	}
+
+	if (file_opened == false) {
+		infoBarFullscreen->setInfo({tr("No file opened.")});
+		infoBarWindowed->setInfo("", tr("No file opened."), "");
+		return;
+	}
+
+	QString position = m_info.fileCount ? QStringLiteral("[%1/%2]").arg(m_info.index + 1).arg(m_info.fileCount) : QString();
+
+	QSize image_size = m_info.imageSize;
+	QString resolution = image_size.width() ? QStringLiteral("%1 x %2").arg(image_size.width()).arg(image_size.height()) : QString();
+
+	QString size = m_info.fileSize ? this->locale().formattedDataSize(m_info.fileSize, 1) : QString();
+
+	Image* image = m_info.image.get();
+	QString format = image ? image->format().toUpper() : QString();
+	QString mime = image ? image->mimeType().name().toUtf8() : QString();
+
+	QString filename = m_info.fileName;
+	if (m_info.edited) {
+		filename += "*";
+	}
+
+	// toggleable states
+	QStringList states;
+	if (m_info.slideshow) {
+		states << "[slideshow]";
+	}
+	if (m_info.shuffle) {
+		states << "[shuffle]";
+	}
+	if (viewerWidget->lockZoomEnabled()) {
+		states << "[zoom lock]";
+	}
+	if (viewerWidget->lockViewEnabled()) {
+		states << "[view lock]";
+	}
+
+	{
+		QStringList title;
+
+		title << QStringLiteral("%1 > %2 %3").arg(m_info.directoryName, filename, position);
+
+		if (settings->windowTitleExtendedInfo()) {
+			if (resolution.isEmpty() == false) {
+				title << resolution;
+			}
+			if (size.isEmpty() == false) {
+				title << size;
+			}
 		}
 
-    QString sizeString;
-    if(info.fileSize)
-        sizeString = this->locale().formattedDataSize(info.fileSize, 1);
+		title << qApp->applicationName();
 
-    if(renameOverlay)
-        renameOverlay->setName(info.fileName);
+		setWindowTitle(title.join(" :: "));
+	}
 
-    QString windowTitle;
-    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
-        windowTitle = tr("Folder view");
-        infoBarFullscreen->setInfo("", tr("No file opened."), "");
-        infoBarWindowed->setInfo("", tr("No file opened."), "");
-    } else if(info.fileName.isEmpty()) {
-        windowTitle = qApp->applicationName();
-        infoBarFullscreen->setInfo("", tr("No file opened."), "");
-        infoBarWindowed->setInfo("", tr("No file opened."), "");
-    } else {
-        windowTitle = info.fileName;
-        if(settings->windowTitleExtendedInfo()) {
-            windowTitle.prepend(posString + "  ");
-            if(!resString.isEmpty())
-                windowTitle.append("  -  " + resString);
-            if(!sizeString.isEmpty())
-                windowTitle.append("  -  " + sizeString);
-        }
+	// if(!settings->infoBarWindowed() && !states.isEmpty())
+	// 		windowTitle.append(" -" + states);
 
-        // toggleable states
-        QString states;
-        if(info.slideshow)
-            states.append(" [slideshow]");
-        if(info.shuffle)
-            states.append(" [shuffle]");
-        if(viewerWidget->lockZoomEnabled())
-            states.append(" [zoom lock]");
-        if(viewerWidget->lockViewEnabled())
-            states.append(" [view lock]");
+	QStringList info;
+	info << m_info.directoryPath;
 
-        if(!settings->infoBarWindowed() && !states.isEmpty())
-            windowTitle.append(" -" + states);
-        if(info.edited)
-            windowTitle.prepend("* ");
+	QStringList image_info;
+	if (resolution.isEmpty() == false) {
+		image_info << resolution;
+	}
+	if (size.isEmpty() == false) {
+		image_info << size;
+	}
+	if (format.isEmpty() == false) {
+		image_info << format;
+	}
+	if (mime.isEmpty() == false) {
+		image_info << mime;
+	}
+	if (states.isEmpty() == false) {
+		image_info << states;
+	}
 
-				QStringList info_list;
-				info_list << info.directoryPath << resString + " :: " + sizeString;
-				if (states.isEmpty() == false) {
-					info_list << states;
-				}
-        infoBarFullscreen->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), info_list.join('\n'));
-				if (showInfoBarFullscreen == false) {
-					infoBarFullscreen->showWhenReady(1500);
-				}
+	info << filename << image_info.join(" :: ");
+	if (m_info.fileCount) {
+		info << QStringLiteral("%1 / %2").arg(m_info.index + 1).arg(m_info.fileCount);
+	}
 
-        infoBarWindowed->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), resString + "  " + sizeString + " " + states);
-    }
-    setWindowTitle(windowTitle);
+	infoBarFullscreen->setInfo(info);
+
+	// if (showInfoBarFullscreen == false) {
+	// 	infoBarFullscreen->showWhenReady(1500);
+	// }
+
+	infoBarWindowed->setInfo(position, filename, resolution + "  " + size + " " + states.join(' '));
 }
 
 // TODO!!! buffer this in mw

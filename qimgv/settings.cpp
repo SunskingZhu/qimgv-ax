@@ -847,7 +847,7 @@ ScalingFilter Settings::scalingFilter() {
     if(mode > 2)
         mode = 1;
 #endif
-    if(mode < 0 || mode > 4)
+    if(mode < 0 || mode >= QI_FILTER_LAST)
         mode = 1;
     return static_cast<ScalingFilter>(mode);
 }
