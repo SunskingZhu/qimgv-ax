@@ -6,6 +6,7 @@
 #include "gui/viewers/videoplayerinitproxy.h"
 #include "gui/overlays/videocontrolsproxy.h"
 #include "gui/overlays/zoomindicatoroverlayproxy.h"
+#include "gui/overlays/clickzoneoverlay.h"
 #include "gui/contextmenu.h"
 
 enum CurrentWidget {
@@ -45,6 +46,7 @@ private:
     std::unique_ptr<ContextMenu> contextMenu;
     VideoControlsProxyWrapper *videoControls;
     ZoomIndicatorOverlayProxy *zoomIndicator;
+    ClickZoneOverlay *clickZoneOverlay;
 
     void enableImageViewer();
     void enableVideoPlayer();
@@ -59,6 +61,8 @@ private:
     void disableVideoPlayer();
 
     QRect videoControlsArea();
+
+    bool eventFilter(QObject *object, QEvent *event);
 
 private slots:
     void onScaleChanged(qreal);

@@ -132,13 +132,25 @@ qimgv can open some extra formats via third-party image plugins. All of them are
 
 # Installation
 
-## Windows builds
-
-  [Grab the latest release here](https://github.com/easymodo/qimgv/releases)
+## Windows
   
-  Windows builds are portable (everything is contained within install folder). Installer additionally sets up file associations.
+  Windows builds are portable (everything is contained within the install folder). The installer also sets up file associations.
   
   _NOTE: `-video` variants include mpv for video support_
+  
+  Grab the latest version from the [releases page](https://github.com/easymodo/qimgv/releases)
+
+  Alternatively you can install it with Chocolatey:
+  
+  ```
+  choco install qimgv
+  ```
+  
+  Or WinGet:
+  
+  ```
+  winget install --id easymodo.qimgv
+  ```
 
 ## GNU+Linux
 
@@ -153,15 +165,7 @@ qimgv-git
 ### Ubuntu / Linux Mint / Pop!\_OS / etc.
 
 ```
-sudo add-apt-repository ppa:easymodo/qimgv
-sudo apt update
 sudo apt install qimgv
-```
-
-_Alternative package with kde support:_
-
-```
-sudo apt install qimgv-kde
 ```
 
 ### Fedora
@@ -192,6 +196,14 @@ xbps-install -S qimgv
 
 ```
 apk add qimgv
+```
+
+## BSD
+
+### FreeBSD
+
+```
+pkg install qimgv
 ```
 
 This list may be incomplete. 

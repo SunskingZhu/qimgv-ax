@@ -301,6 +301,14 @@ public:
     bool trackpadDetection();
     void setTrackpadDetection(bool mode);
 
+    bool clickableEdges();
+    void setClickableEdges(bool mode);
+    bool clickableEdgesVisible();
+    void setClickableEdgesVisible(bool mode);
+
+    bool showHiddenFiles();
+    void setShowHiddenFiles(bool mode);
+
 private:
     explicit Settings(QObject *parent = nullptr);
     QSettings *settingsConf, *stateConf, *themeConf;

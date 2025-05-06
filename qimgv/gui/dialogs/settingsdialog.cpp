@@ -107,6 +107,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     langs.insert("de_DE", "Deutsch");
     langs.insert("en_US", "English");
     langs.insert("es_ES", "Español");
+    langs.insert("fr_FR", "Français");
     langs.insert("uk_UA", "Українська");
     langs.insert("zh_CN", "简体中文");
     // fill langs combobox, sorted by locale
@@ -191,6 +192,10 @@ void SettingsDialog::readSettings() {
     ui->unlockMinZoomCheckBox->setChecked(settings->unlockMinZoom());
     ui->sortFoldersCheckBox->setChecked(settings->sortFolders());
     ui->trackpadDetectionCheckBox->setChecked(settings->trackpadDetection());
+    ui->clickableEdgesCheckBox->setChecked(settings->clickableEdges());
+    ui->clickableEdgesVisibleCheckBox->setChecked(settings->clickableEdgesVisible());
+    ui->clickableEdgesVisibleCheckBox->setEnabled(settings->clickableEdges());
+    ui->showHiddenFilesCheckBox->setChecked(settings->showHiddenFiles());
 
     if(settings->zoomIndicatorMode() == INDICATOR_ENABLED)
         ui->zoomIndicatorOn->setChecked(true);
@@ -312,6 +317,7 @@ void SettingsDialog::saveSettings() {
     settings->setPanelFullscreenOnly(ui->panelFullscreenOnlyCheckBox->isChecked());
     settings->setSquareThumbnails(ui->squareThumbnailsCheckBox->isChecked());
     settings->setTransparencyGrid(ui->transparencyGridCheckBox->isChecked());
+    settings->setShowHiddenFiles(ui->showHiddenFilesCheckBox->isChecked());
     settings->setEnableSmoothScroll(ui->enableSmoothScrollCheckBox->isChecked());
     settings->setUsePreloader(ui->usePreloaderCheckBox->isChecked());
     settings->setUseThumbnailCache(ui->useThumbnailCacheCheckBox->isChecked());
@@ -327,6 +333,8 @@ void SettingsDialog::saveSettings() {
     settings->setUnlockMinZoom(ui->unlockMinZoomCheckBox->isChecked());
     settings->setSortFolders(ui->sortFoldersCheckBox->isChecked());
     settings->setTrackpadDetection(ui->trackpadDetectionCheckBox->isChecked());
+    settings->setClickableEdges(ui->clickableEdgesCheckBox->isChecked());
+    settings->setClickableEdgesVisible(ui->clickableEdgesVisibleCheckBox->isChecked());
 
     if(ui->zoomIndicatorOn->isChecked())
         settings->setZoomIndicatorMode(INDICATOR_ENABLED);

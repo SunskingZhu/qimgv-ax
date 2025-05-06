@@ -3,7 +3,7 @@
 Settings *settings = nullptr;
 
 Settings::Settings(QObject *parent) : QObject(parent) {
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD__)
     // config files
     QSettings::setDefaultFormat(QSettings::NativeFormat);
     settingsConf = new QSettings();
@@ -38,7 +38,7 @@ Settings *Settings::getInstance() {
 }
 //------------------------------------------------------------------------------
 void Settings::setupCache() {
-#ifdef __linux__
+#if defined(__linux__) ||  defined(__FreeBSD__)
     QString genericCacheLocation = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation);
     if(genericCacheLocation.isEmpty())
         genericCacheLocation = QDir::homePath() + "/.cache";
@@ -140,7 +140,7 @@ void Settings::loadStylesheet() {
         int context_menu_button_height = 32 * pDpr;
         int rename_overlay_width = 380 * pDpr;
 
-        qDebug()<< "dpr=" << qApp->devicePixelRatio() << "pDpr=" << pDpr;
+        //qDebug()<< "dpr=" << qApp->devicePixelRatio() << "pDpr=" << pDpr;
 
         // --- write variables into stylesheet --------------------------
         styleSheet.replace("%font_small%", QString::number(font_small)+"pt");
@@ -277,6 +277,7 @@ void Settings::setColorTid(int tid) {
 void Settings::fillVideoFormats() {
     mVideoFormatsMap.insert("video/webm",       "webm");
     mVideoFormatsMap.insert("video/mp4",        "mp4");
+    mVideoFormatsMap.insert("video/mp4",        "m4v");
     mVideoFormatsMap.insert("video/mpeg",       "mpg");
     mVideoFormatsMap.insert("video/mpeg",       "mpeg");
     mVideoFormatsMap.insert("video/x-matroska", "mkv");
@@ -293,6 +294,8 @@ QString Settings::mpvBinary() {
         mpvPath = QCoreApplication::applicationDirPath() + "/mpv.exe";
     #elif defined __linux__
         mpvPath = "/usr/bin/mpv";
+    #elif defined __FreeBSD__
+        mpvPath = "/usr/local/bin/mpv";
     #endif
         if(!QFile::exists(mpvPath))
             mpvPath = "";
@@ -639,8 +642,8 @@ void Settings::readShortcuts(QMap<QString, QString> &shortcuts) {
     for(int i = 0; i < in.count(); i++) {
         pair = in[i].split("=");
         if(!pair[0].isEmpty() && !pair[1].isEmpty()) {
-            if(pair[1]=="eq")
-                pair[1]="=";
+            if(pair[1].endsWith("eq"))
+                pair[1]=pair[1].chopped(2) + "=";
             shortcuts.insert(pair[1], pair[0]);
         }
     }
@@ -653,8 +656,8 @@ void Settings::saveShortcuts(const QMap<QString, QString> &shortcuts) {
     QStringList out;
     while(i.hasNext()) {
         i.next();
-        if(i.key() == "=")
-            out << i.value() + "=" + "eq";
+        if(i.key().endsWith("="))
+            out << i.value() + "=" + i.key().chopped(1) + "eq";
         else
             out << i.value() + "=" + i.key();
     }
@@ -1154,4 +1157,28 @@ bool Settings::trackpadDetection() {
 
 void Settings::setTrackpadDetection(bool mode) {
     settings->settingsConf->setValue("trackpadDetection", mode);
+}
+//------------------------------------------------------------------------------
+bool Settings::clickableEdges() {
+    return settings->settingsConf->value("clickableEdges", false).toBool();
+}
+
+void Settings::setClickableEdges(bool mode) {
+    settings->settingsConf->setValue("clickableEdges", mode);
+}
+//------------------------------------------------------------------------------
+bool Settings::clickableEdgesVisible() {
+    return settings->settingsConf->value("clickableEdgesVisible", true).toBool();
+}
+
+void Settings::setClickableEdgesVisible(bool mode) {
+    settings->settingsConf->setValue("clickableEdgesVisible", mode);
+}
+//------------------------------------------------------------------------------
+bool Settings::showHiddenFiles() {
+    return settings->settingsConf->value("showHiddenFiles", false).toBool();
+}
+
+void Settings::setShowHiddenFiles(bool mode) {
+    settings->settingsConf->setValue("showHiddenFiles", mode);
 }
