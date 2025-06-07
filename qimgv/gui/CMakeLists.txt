@@ -42,8 +42,7 @@ target_sources(qimgv PRIVATE
     overlays/controlsoverlay.cpp
     overlays/copyoverlay.cpp
     overlays/cropoverlay.cpp
-    overlays/floatingmessage.cpp
-    overlays/floatingmessageproxy.cpp
+        overlays/FloatingMessages.cpp
     overlays/fullscreeninfooverlay.cpp
     overlays/fullscreeninfooverlayproxy.cpp
     overlays/imageinfooverlay.cpp
@@ -79,6 +78,8 @@ target_sources(qimgv PRIVATE
     folderview/bookmarkswidget.cpp
     folderview/bookmarksitem.cpp
     folderview/fvoptionspopup.cpp
+
+    widgets/FloatingMessage.cpp
 )
 
 # UI Files
@@ -95,7 +96,6 @@ target_sources(qimgv PRIVATE
 
     overlays/changelogwindow.ui
     overlays/copyoverlay.ui
-    overlays/floatingmessage.ui
     overlays/imageinfooverlay.ui
     overlays/renameoverlay.ui
     overlays/saveconfirmoverlay.ui
@@ -108,4 +108,6 @@ target_sources(qimgv PRIVATE
 
     folderview/folderview.ui
     folderview/fvoptionspopup.ui
+
+        widgets/FloatingMessage.ui
 )

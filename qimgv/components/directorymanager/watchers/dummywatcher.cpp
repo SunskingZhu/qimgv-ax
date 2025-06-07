@@ -3,7 +3,7 @@
 #include <QDebug>
 
 #define TAG         "[DummyWatcher]"
-#define MESSAGE     "Directory watcher isn't yet implemented for your operating system"
+#define MESSAGE     "Directory m_watcher isn't yet implemented for your operating system"
 
 class DummyWatcherWorker : public WatcherWorker {
   public:

@@ -276,7 +276,7 @@ void ViewerWidget::onScalingFinished(std::unique_ptr<QPixmap> scaled) {
 void ViewerWidget::closeImage() {
     imageViewer->closeImage();
     videoPlayer->stop();
-    showCursor();
+    //showCursor();
 }
 
 void ViewerWidget::pauseResumePlayback() {

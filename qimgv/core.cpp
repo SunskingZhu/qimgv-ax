@@ -19,6 +19,8 @@ Core::Core()
       slideshow(false),
       shuffle(false)
 {
+	m_file_manager = new QIV::FileManager(this);
+
     loadTranslation();
     initGui();
     initComponents();
@@ -130,6 +132,10 @@ void Core::connectComponents() {
     connect(model.get(), &DirectoryModel::loadFailed,     this, &Core::onLoadFailed);
 
     connect(&slideshowTimer, &QTimer::timeout, this, &Core::nextImageSlideshow);
+
+	connect(m_file_manager, &QIV::FileManager::errorReported, mw, &MW::showError);
+	connect(m_file_manager, &QIV::FileManager::warningReported, mw, &MW::showWarning);
+	connect(m_file_manager, &QIV::FileManager::successReported, mw, &MW::showSuccess);
 }
 
 void Core::initActions() {
@@ -247,6 +253,34 @@ void Core::initActions() {
 		connect(actionManager, &ActionManager::moveFilePath9, this, [this] () {
 			this->moveFilePathX(9);
 		});
+
+	connect(actionManager, &ActionManager::moveDirectoryPath1, this, [this] () {
+		this->moveDirectoryPathX(1);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath2, this, [this] () {
+		this->moveDirectoryPathX(2);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath3, this, [this] () {
+		this->moveDirectoryPathX(3);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath4, this, [this] () {
+		this->moveDirectoryPathX(4);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath5, this, [this] () {
+		this->moveDirectoryPathX(5);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath6, this, [this] () {
+		this->moveDirectoryPathX(6);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath7, this, [this] () {
+		this->moveDirectoryPathX(7);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath8, this, [this] () {
+		this->moveDirectoryPathX(8);
+	});
+	connect(actionManager, &ActionManager::moveDirectoryPath9, this, [this] () {
+		this->moveDirectoryPathX(9);
+	});
 }
 
 void Core::loadTranslation() {
@@ -416,11 +450,11 @@ void Core::removePermanent() {
     }
     if(paths.count() == 1) {
         if(result == FileOpResult::SUCCESS)
-            mw->showMessageSuccess(tr("File removed"));
+	        mw->showSuccess(tr("File removed"));
         else
             outputError(result);
     } else if(paths.count() > 1) {
-        mw->showMessageSuccess(tr("Removed: ") + QString::number(successCount) + tr(" files"));
+	    mw->showSuccess(tr("Removed: ") + QString::number(successCount) + tr(" files"));
     }
 }
 
@@ -446,11 +480,11 @@ void Core::moveToTrash() {
     }
     if(paths.count() == 1) {
         if(result == FileOpResult::SUCCESS)
-            mw->showMessageSuccess(tr("Moved to trash"));
+	        mw->showSuccess(tr("Moved to trash"));
         else
             outputError(result);
     } else if(paths.count() > 1) {
-        mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
+	    mw->showSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
     }
 }
 
@@ -610,6 +644,9 @@ void Core::onDropIn(const QMimeData *mimeData, QObject* source) {
     if(mimeData->hasUrls()) {
         QStringList pathList;
         QList<QUrl> urlList = mimeData->urls();
+				if (urlList.isEmpty()) {
+					return;
+				}
         // extract the local paths of the files
         for(int i = 0; i < urlList.size(); ++i)
             pathList.append(urlList.at(i).toLocalFile());
@@ -948,46 +985,80 @@ void Core::movePathsTo(QList<QString> paths, QString destDirectory) {
     interactiveMove(paths, destDirectory);
 }
 
-void Core::moveCurrentFile(QString destDirectory) {
-    if(model->isEmpty())
-        return;
-    // pause updates to avoid flicker
-    mw->setUpdatesEnabled(false);
-    // move fails during file playback, so we close it temporarily
-    mw->closeImage();
-		state.currentImg->closeMovie();
 
-    FileOpResult result;
-    model->moveFileTo(selectedPath(), destDirectory, false, result);
-    if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(tr("File moved.") + '\n' + destDirectory);
-    } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
-            model->moveFileTo(selectedPath(), destDirectory, true, result);
-    }
-    if(result != FileOpResult::SUCCESS) {
-        guiSetImage(model->getImage(selectedPath()));
-        updateInfoString();
-        if(result != FileOpResult::DESTINATION_FILE_EXISTS)
-            outputError(result);
-    }
-    mw->setUpdatesEnabled(true);
-    mw->repaint();
+void Core::closeCurrentImage()
+{
+	// move fails during file playback, so we close it temporarily
+	mw->closeImage();
+	if (state.currentImg.get()) {
+		state.currentImg->closeMovie();
+	}
 }
 
-void Core::copyCurrentFile(QString destDirectory) {
-    if(model->isEmpty())
-        return;
-    FileOpResult result;
-    model->copyFileTo(selectedPath(), destDirectory, false, result);
-    if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(tr("File copied.") + '\n' + destDirectory);
-    } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
-            model->copyFileTo(selectedPath(), destDirectory, true, result);
-    }
-    if(result != FileOpResult::SUCCESS && result != FileOpResult::DESTINATION_FILE_EXISTS)
-        outputError(result);
+void Core::moveCurrentFile(QString destDirectory)
+{
+	if (model->isEmpty()) {
+		return;
+	}
+
+	// pause updates to avoid flicker
+	mw->setUpdatesEnabled(false);
+	this->closeCurrentImage();
+
+	QString target = selectedPath();
+
+	bool result = m_file_manager->moveTo(target, destDirectory);
+	if (result == false) {
+		guiSetImage(model->getImage(target));
+		updateInfoString();
+		//outputError(result);
+	} else {
+		if (destDirectory != model->directoryPath()) {
+			model->removeFileEntry(target);
+		}
+	}
+
+	mw->setUpdatesEnabled(true);
+	mw->repaint();
+}
+
+void Core::copyCurrentFile(QString destDirectory)
+{
+	if (model->isEmpty() == false) {
+		m_file_manager->copyTo(selectedPath(), destDirectory);
+	}
+}
+
+void Core::moveCurrentDirectory(QString destDirectory)
+{
+	QString target = model->directoryPath();
+	if (target.isEmpty()) {
+		return;
+	}
+
+	// pause updates to avoid flicker
+	mw->setUpdatesEnabled(false);
+	this->closeCurrentImage();
+
+	QString last = selectedPath();
+	QString next_directory = model->resolveNextDirectory();
+
+	bool result = m_file_manager->moveTo(target, destDirectory);
+	if (result == false) {
+		guiSetImage(model->getImage(last));
+		updateInfoString();
+	} else {
+		model->removeDirEntry(target);
+
+		if (next_directory.isEmpty()) {
+			this->clear();
+		} else {
+			this->switchDirectory(next_directory);
+		}
+	}
+
+	mw->setUpdatesEnabled(true);
+	mw->repaint();
 }
 
 void Core::toggleCropPanel() {
@@ -1102,7 +1173,7 @@ void Core::saveCurrentFileAs(QString destPath) {
     if(model->isEmpty())
         return;
     if(saveFile(selectedPath(), destPath)) {
-        mw->showMessageSuccess(tr("File saved"));
+	    mw->showSuccess(tr("File saved"));
         updateInfoString();
     } else {
         mw->showError(tr("Could not save file"));
@@ -1134,7 +1205,7 @@ QString Core::selectedPath() {
 
 QList<QString> Core::currentSelection() {
     if(!model)
-        return QList<QString>();
+        return {};
     else if(mw->currentViewMode() == MODE_FOLDERVIEW)
         return folderViewPresenter.selectedPaths();
     else
@@ -1144,21 +1215,21 @@ QList<QString> Core::currentSelection() {
 //------------------------
 
 void Core::sortByName() {
-    auto mode = SortingMode::SORT_NAME;
+    auto mode = SortingMode::SORT_NAME_ASC;
     if(model->sortingMode() == mode)
         mode = SortingMode::SORT_NAME_DESC;
     model->setSortingMode(mode);
 }
 
 void Core::sortByTime() {
-    auto mode = SortingMode::SORT_TIME;
+    auto mode = SortingMode::SORT_TIME_ASC;
     if(model->sortingMode() == mode)
         mode = SortingMode::SORT_TIME_DESC;
     model->setSortingMode(mode);
 }
 
 void Core::sortBySize() {
-    auto mode = SortingMode::SORT_SIZE;
+    auto mode = SortingMode::SORT_SIZE_ASC;
     if(model->sortingMode() == mode)
         mode = SortingMode::SORT_SIZE_DESC;
     model->setSortingMode(mode);
@@ -1254,9 +1325,35 @@ void Core::reset() {
     model->setDirectory("");
 }
 
+void Core::clear()
+{
+	state.hasActiveImage = false;
+	state.currentFilePath = QString();
+	model->clear();
+	mw->setDirectoryPath(QString());
+	this->updateInfoString();
+}
+
+#ifdef __WIN32
+QString resolveFullPath(const QString &path)
+{
+	auto length = GetLongPathNameW(reinterpret_cast<LPCWSTR>(path.utf16()), nullptr, 0);
+	auto *buffer = new wchar_t[length];
+	length = GetLongPathNameW(reinterpret_cast<LPCWSTR>(path.utf16()), buffer, length);
+	QString result = QString::fromUtf16(reinterpret_cast<const char16_t *>(buffer), length);
+	delete[] buffer;
+	return result;
+}
+#endif
+
 bool Core::loadPath(QString path) {
     if(path.isEmpty())
         return false;
+
+	#ifdef __WIN32
+	path = resolveFullPath(path);
+	#endif
+
     if(path.startsWith("file://", Qt::CaseInsensitive))
         path.remove(0, 7);
 
@@ -1312,23 +1409,25 @@ bool Core::setDirectory(QString path) {
     return true;
 }
 
-bool Core::loadFileIndex(int index, bool async, bool preload) {
-    if(!model)
-        return false;
-    auto entry = model->fileEntryAt(index);
-    if(entry.path.isEmpty())
-        return false;
-    state.currentFilePath = entry.path;
-    model->unloadExcept(entry.path, preload);
-    model->load(entry.path, async);
-    if(preload) {
-        model->preload(model->nextOf(entry.path));
-        model->preload(model->prevOf(entry.path));
-    }
-    thumbPanelPresenter.selectAndFocus(entry.path);
-    folderViewPresenter.selectAndFocus(entry.path);
-    updateInfoString();
-    return true;
+bool Core::loadFileIndex(int index, bool async, bool preload)
+{
+	if (!model)
+		return false;
+	auto entry = model->fileInfoAt(index);
+	if (entry.size() == 0) {
+		return false;
+	}
+	state.currentFilePath = entry.absoluteFilePath();
+	model->unloadExcept(entry.absoluteFilePath(), preload);
+	model->load(index, async);
+	if (preload) {
+		model->preload(index + 1);
+		model->preload(index - 1);
+	}
+	thumbPanelPresenter.selectAndFocus(entry.absoluteFilePath());
+	folderViewPresenter.selectAndFocus(entry.absoluteFilePath());
+	updateInfoString();
+	return true;
 }
 
 void Core::loadParentDir() {
@@ -1350,16 +1449,13 @@ void Core::nextDirectory() {
     QFileInfo parentDir(currentDir.absolutePath());
     if(parentDir.exists() && parentDir.isReadable()) {
         DirectoryManager dm;
-        if(!dm.setDirectory(parentDir.absoluteFilePath()))
+	    dm.setDirectoriesMode(true);
+        if(!dm.setDirectory(parentDir.absoluteFilePath(), false, false))
             return;
+
         QString next = dm.nextOfDir(model->directoryPath());
         if(!next.isEmpty()) {
-            if(!setDirectory(next))
-                return;
-            QFileInfo fi(next);
-            mw->showMessageDirectory(fi.baseName());
-            if(model->fileCount())
-                loadFileIndex(0, false, true);
+            this->switchDirectory(next);
         } else {
             mw->showMessageDirectoryEnd();
         }
@@ -1373,23 +1469,29 @@ void Core::prevDirectory(bool selectLast) {
     QFileInfo parentDir(currentDir.absolutePath());
     if(parentDir.exists() && parentDir.isReadable()) {
         DirectoryManager dm;
-        dm.setDirectory(parentDir.absoluteFilePath());
+				dm.setDirectoriesMode(true);
+	    dm.setDirectory(parentDir.absoluteFilePath(), false, false);
         QString prev = dm.prevOfDir(model->directoryPath());
         if(!prev.isEmpty()) {
-            if(!setDirectory(prev))
-                return;
-            QFileInfo fi(prev);
-            mw->showMessageDirectory(fi.baseName());
-            if(model->fileCount()) {
-                if(selectLast)
-                    loadFileIndex(model->fileCount() - 1, false, true);
-                else
-                    loadFileIndex(0, false, true);
-            }
+	        this->switchDirectory(prev, selectLast);
         } else {
             mw->showMessageDirectoryStart();
         }
     }
+}
+
+void Core::switchDirectory(const QString &path, bool select_last)
+{
+	if (setDirectory(path) == false) {
+		return;
+	}
+
+	mw->showMessageDirectory(QFileInfo(path).baseName());
+
+	int count = model->fileCount();
+	if (count) {
+		loadFileIndex(select_last ? count - 1 : 0, false, true);
+	}
 }
 
 void Core::prevDirectory() {
@@ -1515,9 +1617,13 @@ void Core::onModelItemReady(std::shared_ptr<Image> img, const QString &path) {
     }
 }
 
-void Core::modelDelayLoad() {
-    model->setDirectory(state.directoryPath);
-    mw->setDirectoryPath(state.directoryPath);
+void Core::modelDelayLoad()
+{
+	QDir dir(state.directoryPath);
+	QWidget *message = mw->addPermanentMessage(tr("Scanning directory...") + '\n' + dir.absolutePath());
+    model->setDirectory(dir.absolutePath());
+	message->deleteLater();
+   mw->setDirectoryPath(dir.absolutePath());
     model->updateImage(state.currentFilePath, state.currentImg);
 		updateInfoString();
 }
@@ -1530,6 +1636,16 @@ void Core::moveFilePathX(int index)
 		return;
 	}
 	this->moveCurrentFile(paths.at(index));
+}
+
+void Core::moveDirectoryPathX(int index)
+{
+	--index;
+	QStringList paths = settings->savedPaths();
+	if (index < 0 || index >= paths.size()) {
+		return;
+	}
+	this->moveCurrentDirectory(paths.at(index));
 }
 
 void Core::onModelItemUpdated(QString filePath) {
@@ -1574,25 +1690,18 @@ void Core::updateInfoString()
 {
 	CurrentInfo &info = mw->info();
 
-	int index = model->indexOfFile(state.currentFilePath);
+	int index = state.currentFilePath.isEmpty() ? -1 : model->indexOfFile(state.currentFilePath);
 
 	info.index = index;
 	info.fileCount = model->fileCount();
-	info.fileName = model->fileNameAt(index);
-	info.filePath = model->filePathAt(index);
+	info.file_info = index >= 0 ? model->fileInfoAt(index) : QFileInfo();
 	info.slideshow = slideshow;
 	info.shuffle = shuffle;
 
-	if (model->isLoaded(state.currentFilePath)) {
+	if (index >= 0 && model->isLoaded(state.currentFilePath)) {
 		info.image = model->getImage(state.currentFilePath);
-		info.imageSize = info.image->size();
-		info.fileSize = info.image->fileSize();
-		info.edited = info.image->isEdited();
 	} else {
 		info.image = nullptr;
-		info.imageSize = QSize(0, 0);
-		info.fileSize = 0;
-		info.edited = false;
 	}
 
 	mw->updateInfo();

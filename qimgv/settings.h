@@ -20,11 +20,11 @@
 #include "themestore.h"
 
 enum SortingMode {
-    SORT_NAME,
+    SORT_NAME_ASC,
     SORT_NAME_DESC,
-    SORT_SIZE,
+    SORT_SIZE_ASC,
     SORT_SIZE_DESC,
-    SORT_TIME,
+    SORT_TIME_ASC,
     SORT_TIME_DESC
 };
 
@@ -107,7 +107,6 @@ public:
     QStringList supportedMimeTypes();
     QList<QByteArray> supportedFormats();
     QString supportedFormatsFilter();
-    QString supportedFormatsRegex();
     int panelPreviewsSize();
     void setPanelPreviewsSize(int size);
     bool usePreloader();

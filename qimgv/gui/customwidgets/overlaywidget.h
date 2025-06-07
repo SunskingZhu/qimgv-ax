@@ -44,8 +44,9 @@ public slots:
 
 private:
     QGraphicsOpacityEffect *opacityEffect;
-    int mHorizontalMargin, mVerticalMargin;
-    bool fadeEnabled;
+    int mHorizontalMargin = 20;
+		int mVerticalMargin = 35;
+    bool fadeEnabled = false;
     QPropertyAnimation *fadeAnimation;
 
 private slots:
@@ -54,5 +55,5 @@ private slots:
 
 protected:
     virtual void recalculateGeometry();
-    FloatingWidgetPosition position;
+    FloatingWidgetPosition position = FloatingWidgetPosition::CENTER;
 };

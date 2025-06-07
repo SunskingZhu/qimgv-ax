@@ -7,7 +7,9 @@ Loader::Loader() {
 
 void Loader::clearTasks() {
     clearPool();
-    pool->waitForDone();
+		if (this->isBusy()) {
+			pool->waitForDone(10 * 1000);
+		}
 }
 
 bool Loader::isBusy() const {

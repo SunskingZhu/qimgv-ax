@@ -193,7 +193,7 @@ void DocumentInfo::loadExifTags() {
     try {
         std::unique_ptr<Exiv2::Image> image;
 
-        image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
 
         assert(image.get() != 0);
         image->readMetadata();

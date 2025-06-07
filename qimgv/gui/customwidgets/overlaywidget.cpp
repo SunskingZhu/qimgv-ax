@@ -1,10 +1,6 @@
 #include "overlaywidget.h"
 
-OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent)
-    : FloatingWidget(parent),
-      mHorizontalMargin(20),
-      mVerticalMargin(35),
-      fadeEnabled(false)
+OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent) : FloatingWidget(parent)
 {
     opacityEffect = new QGraphicsOpacityEffect(this);
     opacityEffect->setOpacity(1.0);
@@ -14,9 +10,7 @@ OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent)
     fadeAnimation->setStartValue(1.0f);
     fadeAnimation->setEndValue(0.0f);
     fadeAnimation->setEasingCurve(QEasingCurve::OutQuad);
-    connect(fadeAnimation, &QPropertyAnimation::finished, [this]() {
-        QWidget::hide();
-    });
+    connect(fadeAnimation, &QPropertyAnimation::finished, this, &QWidget::hide);
 }
 
 OverlayWidget::~OverlayWidget() {

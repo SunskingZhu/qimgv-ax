@@ -5,6 +5,13 @@ WatcherWorker::WatcherWorker()
 {
 }
 
-void WatcherWorker::setRunning(bool running) {
-    isRunning.fetchAndStoreRelaxed(running);
+void WatcherWorker::setRunning(bool running)
+{
+	bool previous = isRunning.fetchAndStoreRelaxed(running);
+	if (previous != running && previous) {
+		stopped();
+	}
 }
+
+void WatcherWorker::stopped()
+{}

@@ -16,6 +16,7 @@
 #include "gui/mainwindow.h"
 #include "utils/randomizer.h"
 #include "gui/dialogs/printdialog.h"
+#include "utils/FileManager.h"
 
 #ifdef __GLIBC__
 #include <malloc.h>
@@ -69,6 +70,7 @@ private:
 
     void rotateByDegrees(int degrees);
     void reset();
+		void clear();
     bool setDirectory(QString path);
 
     QDrag *mDrag;
@@ -82,6 +84,8 @@ private:
     QString selectedPath();
     void guiSetImage(std::shared_ptr<Image> img);
     QTimer slideshowTimer;
+
+	QIV::FileManager *m_file_manager = nullptr;
 
     void startSlideshowTimer();
     void startSlideshow();
@@ -98,6 +102,9 @@ private:
 
     void doInteractiveCopy(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
     void doInteractiveMove(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
+
+	void closeCurrentImage();
+	void switchDirectory(const QString &path, bool select_last = false);
 
 private slots:
     void readSettings();
@@ -117,6 +124,7 @@ private slots:
     void onScalingFinished(QPixmap* scaled, ScalerRequest req);
     void copyCurrentFile(QString destDirectory);
     void moveCurrentFile(QString destDirectory);
+	void moveCurrentDirectory(QString destDirectory);
     void copyPathsTo(QList<QString> paths, QString destDirectory);
     void interactiveCopy(QList<QString> paths, QString destDirectory);
     void interactiveMove(QList<QString> paths, QString destDirectory);
@@ -176,5 +184,6 @@ private slots:
     void print();
     void modelDelayLoad();
 
-		void moveFilePathX(int index);
+	void moveFilePathX(int index);
+	void moveDirectoryPathX(int index);
 };

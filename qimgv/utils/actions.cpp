@@ -81,7 +81,7 @@ void Actions::init() {
     mActions.insert("showInDirectory", QVersionNumber(0,8,82));
     mActions.insert("goUp", QVersionNumber(0,9,2));
     mActions.insert("discardEdits", QVersionNumber(0,9,2));
-    mActions.insert("nextDirectory", QVersionNumber(0,9,2));
+    mActions.insert("resolveNextDirectory", QVersionNumber(0,9,2));
     mActions.insert("prevDirectory", QVersionNumber(0,9,2));
     mActions.insert("seekVideoForward", QVersionNumber(0,9,2));
     mActions.insert("seekVideoBackward", QVersionNumber(0,9,2));
@@ -100,6 +100,16 @@ void Actions::init() {
 		mActions.insert("moveFilePath7", QVersionNumber(1,1,0));
 		mActions.insert("moveFilePath8", QVersionNumber(1,1,0));
 		mActions.insert("moveFilePath9", QVersionNumber(1,1,0));
+
+	mActions.insert("moveDirectoryPath1", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath2", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath3", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath4", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath5", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath6", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath7", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath8", QVersionNumber(1,1,0));
+	mActions.insert("moveDirectoryPath9", QVersionNumber(1,1,0));
 
 		mActions.insert("nextImageOrScrollRight", QVersionNumber(1,1,0));
     mActions.insert("prevImageOrScrollLeft", QVersionNumber(1,1,0));

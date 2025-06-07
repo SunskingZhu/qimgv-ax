@@ -20,12 +20,14 @@ bool Cache::insert(std::shared_ptr<Image> img) {
     return true;
 }
 
-void Cache::remove(QString path) {
+bool Cache::remove(QString path) {
     if(items.contains(path)) {
         items[path]->lock();
         auto *item = items.take(path);
         delete item;
+				return true;
     }
+		return false;
 }
 
 void Cache::clear() {

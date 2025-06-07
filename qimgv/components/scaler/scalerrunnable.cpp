@@ -13,7 +13,7 @@ void ScalerRunnable::run() {
     emit started(req);
     //QElapsedTimer t;
     //t.start();
-    QImage *scaled = ImageLib::scaled(req.image->getImage(), req.size, req.filter ?: QI_FILTER_NEAREST);
+    QImage *scaled = ImageLib::scaled(req.image->getImage(), req.size, req.filter ? req.filter : QI_FILTER_NEAREST);
 		//qDebug() << ">> " << (int) req.filter << " " << req.size << ": " << t.elapsed();
     emit finished(scaled, req);
 }

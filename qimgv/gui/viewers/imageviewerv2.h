@@ -150,7 +150,7 @@ private:
     int zoomThreshold = 4;
     int dragThreshold = 10;
     bool dragsEnabled = true;
-    float zoomStep = 0.1, dpr;
+    float zoomStep = 0.1f, dpr;
     float minScale, maxScale, fitWindowScale, expandLimit, lockedScale;
     QPointF savedViewportPos;
     ViewLockMode mViewLock;

@@ -16,8 +16,11 @@ public:
 signals:
     void notifyEvent(PFILE_NOTIFY_INFORMATION);
 
+protected:
+	virtual void stopped() override;
+
 private:
-    HANDLE hDir;
+    HANDLE hDir = nullptr;
     WCHAR buffer[1024];
     DWORD bytesReturned;
     uint POLL_RATE_MS = 1000;

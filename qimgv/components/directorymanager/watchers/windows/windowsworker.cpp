@@ -10,9 +10,13 @@ void WindowsWorker::setDirectoryHandle(HANDLE hDir) {
     this->hDir = hDir;
 }
 
-void WindowsWorker::freeHandle() {
-    CancelIoEx(this->hDir, NULL);
-    CloseHandle(this->hDir);
+void WindowsWorker::freeHandle()
+{
+	if (this->hDir) {
+		CancelIoEx(this->hDir, NULL);
+		CloseHandle(this->hDir);
+		this->hDir = nullptr;
+	}
 }
 
 void WindowsWorker::run() {
@@ -67,4 +71,10 @@ void WindowsWorker::run() {
         }
         Sleep(POLL_RATE_MS);
     }
+}
+
+void WindowsWorker::stopped()
+{
+	WatcherWorker::stopped();
+	freeHandle();
 }

@@ -18,5 +18,7 @@ Q_SIGNALS:
     void finished();
 
 protected:
+	virtual void stopped();
+
     QAtomicInt isRunning;
 };

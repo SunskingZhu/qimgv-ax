@@ -17,7 +17,7 @@
 #include "gui/viewers/viewerwidget.h"
 #include "gui/overlays/controlsoverlay.h"
 #include "gui/overlays/fullscreeninfooverlayproxy.h"
-#include "gui/overlays/floatingmessageproxy.h"
+#include "gui/overlays/floatingmessages.h"
 #include "gui/overlays/saveconfirmoverlay.h"
 #include "gui/panels/mainpanel/thumbnailstrip.h"
 #include "gui/panels/sidepanel/sidepanel.h"
@@ -36,6 +36,7 @@
 #include "gui/viewers/documentwidget.h"
 #include "gui/folderview/folderviewproxy.h"
 #include "gui/panels/infobar/infobarproxy.h"
+#include "gui/overlays/FloatingMessages.h"
 
 #ifdef USE_KDE_BLUR
 #include <KWindowEffects>
@@ -44,16 +45,10 @@
 struct CurrentInfo {
     int index;
     int fileCount;
-    QString fileName;
-    QString filePath;
-    QString directoryName;
-    QString directoryPath;
-    QSize imageSize;
-    qint64 fileSize;
     bool slideshow;
     bool shuffle;
-    bool edited;
 		std::shared_ptr<Image> image;
+		QFileInfo file_info;
 };
 
 enum ActiveSidePanel {
@@ -88,6 +83,8 @@ public:
 		CurrentInfo &info();
 		const CurrentInfo &info() const;
 
+		QIV::FloatingMessage *addPermanentMessage(const QString &text);
+
 private:
     std::shared_ptr<ViewerWidget> viewerWidget;
     QHBoxLayout layout;
@@ -114,7 +111,7 @@ private:
     ControlsOverlay *controlsOverlay;
     FullscreenInfoOverlayProxy *infoBarFullscreen;
     std::shared_ptr<InfoBarProxy> infoBarWindowed;
-    FloatingMessageProxy *floatingMessage;
+    QIV::FloatingMessages *m_floating_messages;
 
     PanelPosition panelPosition;
     CurrentInfo m_info;
@@ -219,20 +216,17 @@ public slots:
     void showResizeDialog(QSize initialSize);
     void showSettings();
     void triggerFullScreen();
-    void showMessageDirectory(QString dirName);
+    void showMessageDirectory(const QString &mame);
     void showMessageDirectoryEnd();
     void showMessageDirectoryStart();
-    void showMessageFitWindow();
-    void showMessageFitWidth();
-    void showMessageFitOriginal();
+
     void showFullScreen();
     void showWindowed();
     void triggerCopyOverlay();
-    void showMessage(QString text);
-    void showMessage(QString text, int duration);
-    void showMessageSuccess(QString text);
-    void showWarning(QString text);
-    void showError(QString text);
+    void showMessage(const QString &text, int duration = 1500);
+    void showSuccess(const QString &text);
+    void showWarning(const QString &text);
+    void showError(const QString &text);
     void triggerMoveOverlay();
     void closeFullScreenOrExit();
     void close();

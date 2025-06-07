@@ -134,6 +134,16 @@ signals:
 		void moveFilePath8();
 		void moveFilePath9();
 
+	void moveDirectoryPath1();
+	void moveDirectoryPath2();
+	void moveDirectoryPath3();
+	void moveDirectoryPath4();
+	void moveDirectoryPath5();
+	void moveDirectoryPath6();
+	void moveDirectoryPath7();
+	void moveDirectoryPath8();
+	void moveDirectoryPath9();
+
 		void nextImageOrScrollRight();
 		void prevImageOrScrollLeft();
 };

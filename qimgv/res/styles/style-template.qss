@@ -314,7 +314,18 @@ FullscreenInfoOverlay QLabel {
 /* Notifications */
 /*----------------------------------------------------------------------------*/
 
-FloatingMessage QLabel {
+QIV--FloatingMessages {
+    border: none;
+    background: none;
+}
+
+QIV--FloatingMessage {
+    background-color: %widget%;
+    border: 1px solid %widget_border%;
+    border-radius: 3px;
+}
+
+QIV--FloatingMessage QLabel {
     color: %text_hc%;
     font: bold;
 }

@@ -164,13 +164,13 @@ QList<QString> DirectoryPresenter::selectedPaths() const {
     if(mShowDirs) {
         for(auto i : view->selection()) {
             if(i < model->dirCount())
-                paths << model->dirPathAt(i);
+                paths << model->fileInfoAt(i).absolutePath();
             else
-                paths << model->filePathAt(i - model->dirCount());
+                paths << model->fileInfoAt(i - model->dirCount()).absoluteFilePath();
         }
     } else {
         for(auto i : view->selection()) {
-            paths << model->filePathAt(i);
+            paths << model->fileInfoAt(i).absoluteFilePath();
         }
     }
     return paths;
@@ -182,7 +182,7 @@ void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool c
     thumbnailer.clearTasks();
     if(!mShowDirs) {
         for(int i : indexes)
-            thumbnailer.getThumbnailAsync(model->filePathAt(i), size, crop, force);
+            thumbnailer.getThumbnailAsync(model->fileInfoAt(i).absoluteFilePath(), size, crop, force);
         return;
     }
     for(int i : indexes) {
@@ -202,14 +202,14 @@ void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool c
 
             ImageLib::recolor(*pixmap, settings->colorScheme().icons);
 
-            std::shared_ptr<Thumbnail> thumb(new Thumbnail(model->dirNameAt(i),
+            std::shared_ptr<Thumbnail> thumb(new Thumbnail(model->fileInfoAt(i).absolutePath(),
                                                            "Folder",
                                                            size,
                                                            std::shared_ptr<QPixmap>(pixmap)));
             // ^----------------------------------------------------------------
             view->setThumbnail(i, thumb);
         } else {
-            QString path = model->filePathAt(i - model->dirCount());
+            QString path = model->fileInfoAt(i - model->dirCount()).absoluteFilePath();
             thumbnailer.getThumbnailAsync(path, size, crop, force);
         }
     }
@@ -228,13 +228,13 @@ void DirectoryPresenter::onItemActivated(int absoluteIndex) {
     if(!model)
         return;
     if(!mShowDirs) {
-        emit fileActivated(model->filePathAt(absoluteIndex));
+        emit fileActivated(model->fileInfoAt(absoluteIndex).absoluteFilePath());
         return;
     }
     if(absoluteIndex < model->dirCount())
-        emit dirActivated(model->dirPathAt(absoluteIndex));
+        emit dirActivated(model->fileInfoAt(absoluteIndex).absolutePath());
     else
-        emit fileActivated(model->filePathAt(absoluteIndex - model->dirCount()));
+        emit fileActivated(model->fileInfoAt(absoluteIndex - model->dirCount()).absoluteFilePath());
 }
 
 void DirectoryPresenter::onDraggedOut() {
@@ -270,7 +270,7 @@ void DirectoryPresenter::onDroppedInto(const QMimeData *data, QObject *source, i
     // get target dir path
     QString destDir;
     if(showDirs() && targetIndex < model->dirCount())
-       destDir = model->dirPathAt(targetIndex);
+       destDir = model->fileInfoAt(targetIndex).absolutePath();
     if(destDir.isEmpty()) // fallback to the current dir
         destDir = model->directoryPath();
     pathList.removeAll(destDir); // remove target dir from source list

@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "gui/overlays/FloatingMessages.h"
 
 // TODO: nuke this and rewrite
 
@@ -12,7 +13,7 @@ MW::MW(QWidget *parent)
       renameOverlay(nullptr),
       infoBarFullscreen(nullptr),
       imageInfoOverlay(nullptr),
-      floatingMessage(nullptr),
+      m_floating_messages(nullptr),
       cropPanel(nullptr),
       cropOverlay(nullptr)
 {
@@ -75,7 +76,7 @@ void MW::setupUi() {
     sidePanel = new SidePanel(this);
     layout.addWidget(sidePanel);
     imageInfoOverlay = new ImageInfoOverlayProxy(viewerWidget.get());
-    floatingMessage = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
+	m_floating_messages = new QIV::FloatingMessages(viewerWidget.get()); // todo: use additional one for folderview?
     connect(viewerWidget.get(), &ViewerWidget::scalingRequested, this, &MW::scalingRequested);
     connect(viewerWidget.get(), &ViewerWidget::draggedOut, this, qOverload<>(&MW::draggedOut));
     connect(viewerWidget.get(), &ViewerWidget::playbackFinished, this, &MW::playbackFinished);
@@ -136,7 +137,7 @@ void MW::setupSaveOverlay() {
 
 void MW::setupRenameOverlay() {
     renameOverlay = new RenameOverlay(this);
-    renameOverlay->setName(m_info.fileName);
+    renameOverlay->setName(m_info.file_info.fileName());
     connect(renameOverlay, &RenameOverlay::renameRequested, this, &MW::renameRequested);
 }
 
@@ -206,10 +207,10 @@ void MW::switchFitMode() {
         viewerWidget->setFitMode(FIT_WINDOW);
 }
 
-void MW::closeImage() {
-    m_info.fileName = "";
-    m_info.filePath = "";
-    viewerWidget->closeImage();
+void MW::closeImage()
+{
+	m_info.file_info = QFileInfo();
+	viewerWidget->closeImage();
 }
 
 // todo: fix flicker somehow
@@ -268,22 +269,22 @@ void MW::onSortingChanged(SortingMode mode) {
     folderView.get()->onSortingChanged(mode);
     if(centralWidget.get()->currentViewMode() == ViewMode::MODE_DOCUMENT) {
         switch(mode) {
-            case SortingMode::SORT_NAME:      showMessage("Sorting: By Name");              break;
+            case SortingMode::SORT_NAME_ASC:      showMessage("Sorting: By Name");              break;
             case SortingMode::SORT_NAME_DESC: showMessage("Sorting: By Name (desc.)");      break;
-            case SortingMode::SORT_TIME:      showMessage("Sorting: By Time");              break;
+            case SortingMode::SORT_TIME_ASC:      showMessage("Sorting: By Time");              break;
             case SortingMode::SORT_TIME_DESC: showMessage("Sorting: By Time (desc.)");      break;
-            case SortingMode::SORT_SIZE:      showMessage("Sorting: By File Size");         break;
+            case SortingMode::SORT_SIZE_ASC:      showMessage("Sorting: By File Size");         break;
             case SortingMode::SORT_SIZE_DESC: showMessage("Sorting: By File Size (desc.)"); break;
         }
     }
 }
 
-void MW::setDirectoryPath(QString path) {
+void MW::setDirectoryPath(QString path)
+{
+	//m_info.file_info = QFileInfo(path);
     //closeImage();
-    m_info.directoryPath = path;
-    m_info.directoryName = path.split("/").last();
-    folderView->setDirectoryPath(path);
-    onInfoUpdated();
+  folderView->setDirectoryPath(path);
+ // onInfoUpdated();
 }
 
 void MW::toggleLockZoom() {
@@ -305,8 +306,8 @@ void MW::toggleLockView() {
 }
 
 void MW::toggleFullscreenInfoBar() {
-    if(!this->isFullScreen())
-        return;
+    //if(!this->isFullScreen())
+    //    return;
     showInfoBarFullscreen = !showInfoBarFullscreen;
     if(showInfoBarFullscreen)
         infoBarFullscreen->showWhenReady();
@@ -790,13 +791,15 @@ void MW::closeFullScreenOrExit() {
 void MW::onInfoUpdated()
 {
 	if (renameOverlay) {
-		renameOverlay->setName(m_info.fileName);
+		renameOverlay->setName(m_info.file_info.fileName());
 	}
+
+	QFileInfo file_info = m_info.file_info;
 
 	bool file_opened = false;
 	if (centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
 		setWindowTitle(tr("Folder view"));
-	} else if (m_info.fileName.isEmpty()) {
+	} else if (file_info.size() == 0) {
 		setWindowTitle(qApp->applicationName());
 	} else {
 		file_opened = true;
@@ -810,17 +813,17 @@ void MW::onInfoUpdated()
 
 	QString position = m_info.fileCount ? QStringLiteral("[%1/%2]").arg(m_info.index + 1).arg(m_info.fileCount) : QString();
 
-	QSize image_size = m_info.imageSize;
-	QString resolution = image_size.width() ? QStringLiteral("%1 x %2").arg(image_size.width()).arg(image_size.height()) : QString();
-
-	QString size = m_info.fileSize ? this->locale().formattedDataSize(m_info.fileSize, 1) : QString();
+	QString size = file_info.size() ? this->locale().formattedDataSize(file_info.size(), 1) : QString();
 
 	Image* image = m_info.image.get();
 	QString format = image ? image->format().toUpper() : QString();
 	QString mime = image ? image->mimeType().name().toUtf8() : QString();
 
-	QString filename = m_info.fileName;
-	if (m_info.edited) {
+	QSize image_size = image ? image->size() : QSize();
+	QString resolution = image_size.width() ? QStringLiteral("%1 x %2").arg(image_size.width()).arg(image_size.height()) : QString();
+
+	QString filename = file_info.fileName();
+	if (image && image->isEdited()) {
 		filename += "*";
 	}
 
@@ -842,7 +845,7 @@ void MW::onInfoUpdated()
 	{
 		QStringList title;
 
-		title << QStringLiteral("%1 > %2 %3").arg(m_info.directoryName, filename, position);
+		title << QStringLiteral("%1 > %2 %3").arg(file_info.dir().dirName(), filename, position);
 
 		if (settings->windowTitleExtendedInfo()) {
 			if (resolution.isEmpty() == false) {
@@ -862,7 +865,7 @@ void MW::onInfoUpdated()
 	// 		windowTitle.append(" -" + states);
 
 	QStringList info;
-	info << m_info.directoryPath;
+	info << file_info.absolutePath();
 
 	QStringList image_info;
 	if (resolution.isEmpty() == false) {
@@ -881,7 +884,8 @@ void MW::onInfoUpdated()
 		image_info << states;
 	}
 
-	info << filename << image_info.join(" :: ");
+	info << filename << image_info.join(" :: ") << file_info.lastModified().toString("yyyy-MM-dd HH:mm:ss");
+
 	if (m_info.fileCount) {
 		info << QStringLiteral("%1 / %2").arg(m_info.index + 1).arg(m_info.fileCount);
 	}
@@ -924,51 +928,49 @@ bool MW::scaledImageWidthFits() const
 	return viewerWidget->scaledImageWidthFits();
 }
 
+QIV::FloatingMessage *MW::addPermanentMessage(const QString &text)
+{
+	return m_floating_messages->addMessage(text, QIV::FloatingMessageIcon::NO_ICON, QIV::FloatingMessages::DURATION_FOREVER);
+}
+
 // todo: this is crap
-void MW::showMessageDirectory(QString dirName) {
-    floatingMessage->showMessage(dirName, FloatingMessageIcon::ICON_DIRECTORY, 1700);
+void MW::showMessageDirectory(const QString &mame)
+{
+	m_floating_messages->addMessage(mame, QIV::FloatingMessageIcon::ICON_DIRECTORY);
 }
 
-void MW::showMessageDirectoryEnd() {
+void MW::showMessageDirectoryEnd()
+{
+	m_floating_messages->addMessage(tr("The last image in the directory"), QIV::FloatingMessageIcon::ICON_RIGHT_EDGE);
     // TODO replace with something nicer (integrate with click overlay?)
-    //floatingMessage->showMessage("", FloatingWidgetPosition::RIGHT, FloatingMessageIcon::ICON_RIGHT_EDGE, 400);
+    //m_floating_messages->showMessage("", FloatingWidgetPosition::RIGHT, FloatingMessageIcon::ICON_RIGHT_EDGE, 400);
 }
 
-void MW::showMessageDirectoryStart() {
+void MW::showMessageDirectoryStart()
+{
+	m_floating_messages->addMessage(tr("The first image in the directory"), QIV::FloatingMessageIcon::ICON_LEFT_EDGE);
     // TODO replace with something nicer (integrate with click overlay?)
-    //floatingMessage->showMessage("", FloatingWidgetPosition::LEFT, FloatingMessageIcon::ICON_LEFT_EDGE, 400);
+    //m_floating_messages->showMessage("", FloatingWidgetPosition::LEFT, FloatingMessageIcon::ICON_LEFT_EDGE, 400);
 }
 
-void MW::showMessageFitWindow() {
-    floatingMessage->showMessage(tr("Fit Window"), FloatingMessageIcon::NO_ICON, 350);
+void MW::showMessage(const QString &text, int duration)
+{
+	m_floating_messages->addMessage(text, QIV::FloatingMessageIcon::NO_ICON, duration);
 }
 
-void MW::showMessageFitWidth() {
-    floatingMessage->showMessage(tr("Fit Width"), FloatingMessageIcon::NO_ICON, 350);
+void MW::showSuccess(const QString &text)
+{
+	m_floating_messages->success(text);
 }
 
-void MW::showMessageFitOriginal() {
-    floatingMessage->showMessage(tr("Fit 1:1"), FloatingMessageIcon::NO_ICON, 350);
+void MW::showWarning(const QString &text)
+{
+	m_floating_messages->warning(text);
 }
 
-void MW::showMessage(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::NO_ICON, 1500);
-}
-
-void MW::showMessage(QString text, int duration) {
-    floatingMessage->showMessage(text, FloatingMessageIcon::NO_ICON, duration);
-}
-
-void MW::showMessageSuccess(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_SUCCESS, 1500);
-}
-
-void MW::showWarning(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_WARNING, 1500);
-}
-
-void MW::showError(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_ERROR, 2800);
+void MW::showError(const QString &text)
+{
+	m_floating_messages->error(text);
 }
 
 bool MW::showConfirmation(QString title, QString msg) {
@@ -1027,7 +1029,10 @@ void MW::adaptToWindowState() {
             controlsOverlay->hide();
     } else { //------------------------------------------------------ window ---
         applyWindowedBackground();
-        infoBarFullscreen->hide();
+		    if(showInfoBarFullscreen)
+			    infoBarFullscreen->showWhenReady();
+		    else
+			    infoBarFullscreen->hide();
 
         if(showInfoBarWindowed)
             infoBarWindowed->show();

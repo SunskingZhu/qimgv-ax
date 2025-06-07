@@ -11,21 +11,22 @@ void CmdOptionsRunner::generateThumbs(QString dirPath, int size) {
 
     Thumbnailer th;
     DirectoryManager dm;
-    if(!dm.setDirectoryRecursive(dirPath)) {
+    if(!dm.setDirectory(dirPath, true, false)) {
         qDebug() << "Error: Invalid path.";
         QCoreApplication::exit(1);
         return;
     }
 
-    auto list = dm.fileList();
+    const QFileInfoList &files = dm.files();
 
     qDebug() << "\nDirectory:" << dirPath;
-    qDebug() << "File count:" << list.size();
+    qDebug() << "File count:" << files.size();
     qDebug() << "Size limit:" << size << "x" << size << "px";
     qDebug() << "Generating thumbnails...";
 
-    for(auto path : list)
-        th.getThumbnailAsync(path, size, false, false);
+    for (const QFileInfo &file : files) {
+	    th.getThumbnailAsync(file.absoluteFilePath(), size, false, false);
+		}
 
     th.waitForDone();
     qDebug() << "\nDone.";

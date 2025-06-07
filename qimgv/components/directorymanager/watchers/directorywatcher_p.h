@@ -16,6 +16,7 @@ class DirectoryWatcherPrivate : public QObject {
     Q_OBJECT
 public:
     explicit DirectoryWatcherPrivate(DirectoryWatcher* qq, WatcherWorker *w);
+		~DirectoryWatcherPrivate();
 
     DirectoryWatcher* q_ptr;
     QVector<QSharedPointer<WatcherEvent>> directoryEvents;

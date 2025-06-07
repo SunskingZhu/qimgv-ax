@@ -12,7 +12,7 @@ class Cache {
 public:
     explicit Cache();
     bool contains(QString path) const;
-    void remove(QString path);
+    bool remove(QString path);
     void clear();
 
     bool insert(std::shared_ptr<Image> img);

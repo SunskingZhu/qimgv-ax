@@ -4,7 +4,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 if(APPLE)
     set(APPLE_ICON_NAME "qimgv.icns")
-    set(APPLE_ICON_PATH "distrib/${APPLE_ICON_NAME}")
+    set(APPLE_ICON_PATH "distrib/${APPLE_ICON_NAME}"
+            gui/widgets/FloatingMessage.cpp
+            gui/widgets/FloatingMessage.h
+            gui/widgets/FloatingMessage.h)
 endif()
 
 # TRANSLATIONS

@@ -24,6 +24,14 @@ DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher* qq, WatcherWo
 {
 }
 
+DirectoryWatcherPrivate::~DirectoryWatcherPrivate()
+{
+	worker->setRunning(false);
+	workerThread->quit();
+	workerThread->terminate();
+	workerThread->wait(10 * 1000);
+}
+
 DirectoryWatcher::~DirectoryWatcher() {
     delete d_ptr;
     d_ptr = nullptr;
@@ -32,21 +40,17 @@ DirectoryWatcher::~DirectoryWatcher() {
 // Move this function to some creational class
 DirectoryWatcher *DirectoryWatcher::newInstance()
 {
-    DirectoryWatcher* watcher;
-
 #if defined(__linux__) || defined(__FreeBSD__)
-        watcher = new LinuxWatcher();
+	return new LinuxWatcher();
 #elif _WIN32
-        watcher = new WindowsWatcher();
+	return new WindowsWatcher();
 #elif __unix__
-        watcher = new DummyWatcher();
+	return new DummyWatcher();
 #elif __APPLE__
-        watcher = new DummyWatcher();
+	return new DummyWatcher();
 #else
-        watcher = new DummyWatcher();
+	return DummyWatcher();
 #endif
-
-    return watcher;
 }
 
 void DirectoryWatcher::setWatchPath(const QString& path) {

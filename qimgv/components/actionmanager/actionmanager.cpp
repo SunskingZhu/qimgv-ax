@@ -82,7 +82,7 @@ void ActionManager::initDefaults() {
     actionManager->defaults.insert(InputMap::keyNameCtrl() + "+D", "showInDirectory");
     actionManager->defaults.insert("`", "toggleSlideshow");
     actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Z", "discardEdits");
-    actionManager->defaults.insert(InputMap::keyNameShift() + "+Right", "nextDirectory");
+    actionManager->defaults.insert(InputMap::keyNameShift() + "+Right", "resolveNextDirectory");
     actionManager->defaults.insert(InputMap::keyNameShift() + "+Left", "prevDirectory");
     actionManager->defaults.insert(InputMap::keyNameShift() + "+F", "toggleFullscreenInfoBar");
     actionManager->defaults.insert(InputMap::keyNameCtrl() + "+V", "pasteFile");

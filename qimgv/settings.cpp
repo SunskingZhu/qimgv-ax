@@ -330,17 +330,6 @@ QString Settings::supportedFormatsFilter() {
     return filters;
 }
 //------------------------------------------------------------------------------
-QString Settings::supportedFormatsRegex() {
-    QString filter;
-    QList<QByteArray> formats = supportedFormats();
-    filter.append(".*\\.(");
-    for(int i = 0; i < formats.count(); i++)
-        filter.append(QString(formats.at(i)) + "|");
-    filter.chop(1);
-    filter.append(")$");
-    return filter;
-}
-//------------------------------------------------------------------------------
 // returns list of mime types
 QStringList Settings::supportedMimeTypes() {
     QStringList filters;
@@ -427,7 +416,7 @@ void Settings::setBlurBackground(bool mode) {
 //------------------------------------------------------------------------------
 void Settings::setSortingMode(SortingMode mode) {
     if(mode >= 6)
-        mode = SortingMode::SORT_NAME;
+        mode = SortingMode::SORT_NAME_ASC;
     settings->settingsConf->setValue("sortingMode", mode);
 }
 

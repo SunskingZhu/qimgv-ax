@@ -31,11 +31,12 @@ void FullscreenInfoOverlay::setInfo(const QStringList &info)
 
 	while (layout->count() > info.count()) {
 		QLayoutItem *item;
-		while ((item = layout->takeAt(0)) != nullptr) {
+		if ((item = layout->takeAt(0)) != nullptr) {
 			delete item->widget();
 			delete item;
 		}
 	}
+
 	while (layout->count() < info.count()) {
 		QLabel *label = new QLabel(this);
 		QFont font = label->font();

@@ -15,14 +15,19 @@ public:
 
     Scaler *scaler;
 
+	void load(int index, bool async);
+	void preload(int index);
+	void reload(int index);
+
+	void clear();
+
     void load(QString filePath, bool asyncHint);
-    void preload(QString filePath);
 
     int fileCount() const;
     int dirCount() const;
     int indexOfFile(QString filePath) const;
     int indexOfDir(QString filePath) const;
-    QString fileNameAt(int index) const;
+
     bool containsFile(QString filePath) const;
     bool isEmpty() const;
     QString nextOf(QString filePath) const;
@@ -31,14 +36,17 @@ public:
     QString lastFile() const;
     QDateTime lastModified(QString filePath) const;
 
+	void removeFileEntry(const QString &filePath);
+	void removeDirEntry(const QString &dirPath);
+	QString resolveNextDirectory() const;
+
     bool forceInsert(QString filePath);
-    void copyFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
     void moveFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
     void renameEntry(const QString &oldFilePath, const QString &newName, bool force, FileOpResult &result);
     void removeFile(const QString &filePath, bool trash, FileOpResult &result);
     void removeDir(const QString &dirPath, bool trash, bool recursive, FileOpResult &result);
 
-    bool setDirectory(QString);
+  bool setDirectory(const QString &path);
 
     void unload(int index);
 
@@ -57,13 +65,11 @@ public:
     bool isLoaded(int index) const;
     bool isLoaded(QString filePath) const;
     void reload(QString filePath);
-    QString filePathAt(int index) const;
+
     void unloadExcept(QString filePath, bool keepNearby);
-    const FSEntry &fileEntryAt(int index) const;
+    const QFileInfo &fileInfoAt(int index) const;
 
     int totalCount() const;
-    QString dirNameAt(int index) const;
-    QString dirPathAt(int index) const;
 
     bool autoRefresh();
 
@@ -91,7 +97,6 @@ private:
     DirectoryManager dirManager;
     Loader loader;
     Cache cache;
-    FileListSource fileListSource;
 
 private slots:
     void onImageReady(std::shared_ptr<Image> img, const QString &path);

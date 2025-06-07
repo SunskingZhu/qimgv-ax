@@ -1,8 +1,6 @@
 #include "directorymodel.h"
 
-DirectoryModel::DirectoryModel(QObject *parent) :
-    QObject(parent),
-    fileListSource(SOURCE_DIRECTORY)
+DirectoryModel::DirectoryModel(QObject *parent) : QObject(parent)
 {
     scaler = new Scaler(&cache);
 
@@ -49,24 +47,9 @@ SortingMode DirectoryModel::sortingMode() const {
     return dirManager.sortingMode();
 }
 
-const FSEntry &DirectoryModel::fileEntryAt(int index) const {
-    return dirManager.fileEntryAt(index);
-}
-
-QString DirectoryModel::fileNameAt(int index) const {
-    return dirManager.fileNameAt(index);
-}
-
-QString DirectoryModel::filePathAt(int index) const {
-    return dirManager.filePathAt(index);
-}
-
-QString DirectoryModel::dirNameAt(int index) const {
-    return dirManager.dirNameAt(index);
-}
-
-QString DirectoryModel::dirPathAt(int index) const {
-    return dirManager.dirPathAt(index);
+const QFileInfo &DirectoryModel::fileInfoAt(int index) const
+{
+	return dirManager.fileEntryAt(index);
 }
 
 bool DirectoryModel::autoRefresh() {
@@ -137,7 +120,7 @@ void DirectoryModel::removeFile(const QString &filePath, bool trash, FileOpResul
 void DirectoryModel::renameEntry(const QString &oldPath, const QString &newName, bool force, FileOpResult &result) {
     bool isDir = dirManager.isDir(oldPath);
     FileOperations::rename(oldPath, newName, force, result);
-    // chew through watcher events so they wont be processed out of order
+    // chew through m_watcher events so they wont be processed out of order
     qApp->processEvents();
     if(result != FileOpResult::SUCCESS)
         return;
@@ -159,13 +142,9 @@ void DirectoryModel::removeDir(const QString &dirPath, bool trash, bool recursiv
     return;
 }
 
-void DirectoryModel::copyFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result) {
-    FileOperations::copyFileTo(srcFile, destDirPath, force, result);
-}
-
 void DirectoryModel::moveFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result) {
     FileOperations::moveFileTo(srcFile, destDirPath, force, result);
-    // chew through watcher events so they wont be processed out of order
+    // chew through m_watcher events so they wont be processed out of order
     qApp->processEvents();
     if(result == FileOpResult::SUCCESS) {
         if(destDirPath != this->directoryPath())
@@ -173,14 +152,15 @@ void DirectoryModel::moveFileTo(const QString &srcFile, const QString &destDirPa
     }
 }
 // -----------------------------------------------------------------------------
-bool DirectoryModel::setDirectory(QString path) {
-    cache.clear();
-    return dirManager.setDirectory(path);
+bool DirectoryModel::setDirectory(const QString &path)
+{
+	cache.clear();
+	return dirManager.setDirectory(path);
 }
 
-void DirectoryModel::unload(int index) {
-    QString filePath = this->filePathAt(index);
-    cache.remove(filePath);
+void DirectoryModel::unload(int index)
+{
+	cache.remove(this->fileInfoAt(index).absoluteFilePath());
 }
 
 void DirectoryModel::unload(QString filePath) {
@@ -272,7 +252,7 @@ void DirectoryModel::onFileRenamed(QString fromPath, int indexFrom, QString toPa
 }
 
 bool DirectoryModel::isLoaded(int index) const {
-    return cache.contains(filePathAt(index));
+    return cache.contains(fileInfoAt(index).absoluteFilePath());
 }
 
 bool DirectoryModel::isLoaded(QString filePath) const {
@@ -280,7 +260,7 @@ bool DirectoryModel::isLoaded(QString filePath) const {
 }
 
 std::shared_ptr<Image> DirectoryModel::getImageAt(int index) {
-    return getImage(filePathAt(index));
+    return getImage(fileInfoAt(index).absoluteFilePath());
 }
 
 // returns cached image
@@ -332,7 +312,91 @@ void DirectoryModel::reload(QString filePath) {
     }
 }
 
-void DirectoryModel::preload(QString filePath) {
-    if(containsFile(filePath) && !cache.contains(filePath))
-        loader.loadAsync(filePath);
+void DirectoryModel::load(int index, bool async)
+{
+	QFileInfo info = dirManager.fileEntryAt(index);
+	if (info.size() == 0) {
+		return;
+	}
+	QString file_path = info.absoluteFilePath();
+	if (loader.isLoading(file_path)) {
+		return;
+	}
+
+	auto cached_image = cache.get(file_path);
+	if (cached_image) {
+		emit imageReady(cached_image, file_path);
+		return;
+	}
+
+	if (async) {
+		loader.loadAsyncPriority(file_path);
+		return;
+	}
+
+	auto image = loader.load(file_path);
+	if (image) {
+		cache.insert(image);
+		emit imageReady(image, file_path);
+	} else {
+		emit loadFailed(file_path);
+	}
+}
+
+void DirectoryModel::preload(int index)
+{
+	QFileInfo info = dirManager.fileEntryAt(index);
+	if (info.size()) {
+		QString file_path = info.absoluteFilePath();
+		if (cache.contains(file_path) == false) {
+			loader.loadAsync(file_path);
+		}
+	}
+}
+
+void DirectoryModel::reload(int index)
+{
+	QFileInfo info = dirManager.fileEntryAt(index);
+	if (info.size()) {
+		QString file_path = info.absoluteFilePath();
+		if (cache.remove(file_path)) {
+			dirManager.updateFileEntry(file_path);
+			load(index, false);
+		}
+	}
+}
+
+void DirectoryModel::removeFileEntry(const QString &filePath)
+{
+	dirManager.removeFileEntry(filePath);
+}
+
+void DirectoryModel::removeDirEntry(const QString &dirPath)
+{
+	dirManager.removeDirEntry(dirPath);
+}
+
+QString DirectoryModel::resolveNextDirectory() const
+{
+	QString directory_path = this->directoryPath();
+
+	if (directory_path.isEmpty()) {
+		return QString();
+	}
+
+	QDir parent = QFileInfo(directory_path).dir();
+
+	DirectoryManager dm;
+	dm.setDirectoriesMode(true);
+	if (dm.setDirectory(parent.path(), false, false) == false) {
+		return QString();
+	}
+
+	return dm.nextOfDir(directory_path);
+}
+
+void DirectoryModel::clear()
+{
+	cache.clear();
+	dirManager.clear();
 }
