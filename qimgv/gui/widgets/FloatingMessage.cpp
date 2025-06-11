@@ -1,6 +1,9 @@
 #include "FloatingMessage.h"
 #include "ui_FloatingMessage.h"
 
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
+
 QIV::FloatingMessage::FloatingMessage(QWidget *parent) : QWidget(parent), ui(new Ui::FloatingMessage)
 {
 	ui->setupUi(this);
@@ -9,6 +12,17 @@ QIV::FloatingMessage::FloatingMessage(QWidget *parent) : QWidget(parent), ui(new
 
 	this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 	ui->textLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+
+	auto opacity_effect = new QGraphicsOpacityEffect(this);
+	opacity_effect->setOpacity(1.0);
+	this->setGraphicsEffect(opacity_effect);
+
+	m_fade_animation = new QPropertyAnimation(opacity_effect, "opacity", this);
+	m_fade_animation->setDuration(500);
+	m_fade_animation->setStartValue(1.0f);
+	m_fade_animation->setEndValue(0.0f);
+	m_fade_animation->setEasingCurve(QEasingCurve::OutQuad);
+	connect(m_fade_animation, &QPropertyAnimation::finished, this, &QWidget::deleteLater);
 }
 
 QIV::FloatingMessage::~FloatingMessage()
@@ -63,4 +77,10 @@ void QIV::FloatingMessage::paintEvent(QPaintEvent *event)
 	option.initFrom(this);
 	QPainter painter(this);
 	style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
+}
+
+void QIV::FloatingMessage::discard()
+{
+	m_fade_animation->stop();
+	m_fade_animation->start(QPropertyAnimation::KeepWhenStopped);
 }

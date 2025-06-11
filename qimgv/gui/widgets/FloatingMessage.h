@@ -2,6 +2,8 @@
 
 #include <QWidget>
 
+class QPropertyAnimation;
+
 namespace QIV
 {
 	namespace Ui {
@@ -22,17 +24,19 @@ namespace QIV
 	{
 		Q_OBJECT
 	public:
-		explicit FloatingMessage(QWidget *parent = 0);
-		~FloatingMessage();
+		explicit FloatingMessage(QWidget *parent = nullptr);
+		~FloatingMessage() override;
 
 	public slots:
 		void setIcon(FloatingMessageIcon icon);
 		void setText(const QString &text);
+		void discard();
 
 	protected:
-		void paintEvent(QPaintEvent *event);
+		void paintEvent(QPaintEvent *event) override;
 
 	private:
 		Ui::FloatingMessage *ui;
+		QPropertyAnimation *m_fade_animation = nullptr;
 	};
 } // QIV

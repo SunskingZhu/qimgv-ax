@@ -77,6 +77,7 @@ void MW::setupUi() {
     layout.addWidget(sidePanel);
     imageInfoOverlay = new ImageInfoOverlayProxy(viewerWidget.get());
 	m_floating_messages = new QIV::FloatingMessages(viewerWidget.get()); // todo: use additional one for folderview?
+	m_floating_messages->setMargins(QMargins(16, 16, 16, 16));
     connect(viewerWidget.get(), &ViewerWidget::scalingRequested, this, &MW::scalingRequested);
     connect(viewerWidget.get(), &ViewerWidget::draggedOut, this, qOverload<>(&MW::draggedOut));
     connect(viewerWidget.get(), &ViewerWidget::playbackFinished, this, &MW::playbackFinished);

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "gui/customwidgets/overlaywidget.h"
+#include "gui/customwidgets/floatingwidget.h"
 #include "gui/widgets/FloatingMessage.h"
 
 namespace QIV
 {
-	class FloatingMessages : public OverlayWidget
+	class FloatingMessages : public FloatingWidget
 	{
 	Q_OBJECT
 	public:
@@ -19,6 +19,12 @@ namespace QIV
 
 		FloatingMessage *addMessage(const QString &text, FloatingMessageIcon icon = NO_ICON, int duration = DURATION_DEFAULT);
 
+		const QMargins &margins() const;
+		void setMargins(const QMargins &margins);
+
+		const Qt::Alignment &alignment() const;
+		void setAlignment(const Qt::Alignment &alignment);
+
 	public slots:
 		void error(const QString &text);
 		void warning(const QString &text);
@@ -28,7 +34,13 @@ namespace QIV
 		void mousePressEvent(QMouseEvent *event);
 		virtual void resizeEvent(QResizeEvent *event);
 
+		virtual void recalculateGeometry();
+
 	private slots:
 		void readSettings();
+
+	private:
+		QMargins m_margins;
+		Qt::Alignment m_alignment = Qt::AlignBottom | Qt::AlignLeft;
 	};
 }

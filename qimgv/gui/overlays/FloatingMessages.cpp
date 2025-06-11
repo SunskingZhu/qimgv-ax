@@ -5,18 +5,13 @@
 
 #include "settings.h"
 
-QIV::FloatingMessages::FloatingMessages(FloatingWidgetContainer *parent) : OverlayWidget(parent)
+QIV::FloatingMessages::FloatingMessages(FloatingWidgetContainer *parent) : FloatingWidget(parent)
 {
-	position = FloatingWidgetPosition::BOTTOMLEFT;
-
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->setSizeConstraint(QLayout::SetMinimumSize);
 	layout->setDirection(QBoxLayout::BottomToTop);
 	layout->setContentsMargins(0, 0, 0, 0);
 	this->setLayout(layout);
-
-	setFadeEnabled(true);
-	setFadeDuration(300);
 
 	readSettings();
 
@@ -64,7 +59,7 @@ QIV::FloatingMessage *QIV::FloatingMessages::addMessage(const QString &text, QIV
 	if (duration >= 0) {
 		QTimer *timer = new QTimer(this);
 
-		connect(timer, &QTimer::timeout, message, &QWidget::deleteLater);
+		connect(timer, &QTimer::timeout, message, &FloatingMessage::discard);
 		connect(timer, &QTimer::timeout, timer, &QTimer::deleteLater);
 
 		timer->setSingleShot(true);
@@ -94,4 +89,48 @@ void QIV::FloatingMessages::resizeEvent(QResizeEvent *event)
 {
 	QWidget::resizeEvent(event);
 	this->recalculateGeometry();
+}
+
+void QIV::FloatingMessages::recalculateGeometry()
+{
+	QPoint pos(0, 0);
+	QSize size = sizeHint();
+
+	if (m_alignment & Qt::AlignLeft) {
+		pos.setX(m_margins.left());
+	} else if (m_alignment & Qt::AlignRight) {
+		pos.setX(containerSize().width() - size.width() - m_margins.right());
+	} else {
+		pos.setX( (containerSize().width() - size.width()) / 2);
+	}
+
+	if (m_alignment & Qt::AlignTop) {
+		pos.setY(m_margins.top());
+	} else if (m_alignment & Qt::AlignBottom) {
+		pos.setY(containerSize().height() - size.height() - m_margins.bottom());
+	} else {
+		pos.setY( (containerSize().height() - size.height()) / 2);
+	}
+
+	setGeometry(QRect(pos, size));
+}
+
+const QMargins &QIV::FloatingMessages::margins() const
+{
+	return m_margins;
+}
+
+void QIV::FloatingMessages::setMargins(const QMargins &margins)
+{
+	m_margins = margins;
+}
+
+const Qt::Alignment &QIV::FloatingMessages::alignment() const
+{
+	return m_alignment;
+}
+
+void QIV::FloatingMessages::setAlignment(const Qt::Alignment &alignment)
+{
+	m_alignment = alignment;
 }
